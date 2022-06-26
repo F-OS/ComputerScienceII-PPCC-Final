@@ -37,3 +37,8 @@ void file_handler::write(const std::string& a) const
 	rewind(current_handle.get());
 	fputs(a.c_str(), current_handle.get());
 }
+
+bool file_handler::ready_for_exit()
+{
+	return true; // Todo: define save logic
+}

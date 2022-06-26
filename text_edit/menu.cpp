@@ -21,19 +21,26 @@ main_menu::main_menu(dispatch& dispatch_pass) : menu(dispatch_pass)
 
 void main_menu::help()
 {
-	std::string help_text = R"(
-	Welcome to Textedit, a console text editor!
-	This editor offers nano-style cursor control. You can navigate text using the four arrow keys,
-	the Page Up and Page Down keys,
-	the Home and End keys,
-	and by searching for text with CTRL-G
-	If you want to save and quit to the main menu, use CTRL-Q
-	Ctrl-C and Ctrl-V copy and paste, respectively.
-	If you need to immediately exit without saving, use CTRL-!
-	Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Final
-	To save your work, press CTRL-S, to save your work to a new directory, press CTRL-F
+	std::string help_text = R"(Welcome to Textedit, a console text editor!
+This editor offers nano-style cursor control. You can navigate text using the four arrow keys,
+the Page Up and Page Down keys,
+the Home and End keys,
+and by searching for text with CTRL-G
+If you want to save and quit to the main menu, use CTRL-Q
+Ctrl-C and Ctrl-V copy and paste, respectively.
+If you need to immediately exit without saving, use CTRL-!
+To save your work, press CTRL-S, to save your work to a new directory, press CTRL-F
+Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Final
 	)";
-	dispatcher->get_text_render()->center_text(help_text);
+	std::string center = dispatcher->get_text_render()->center_text(help_text);
+	std::cout << center;
+	short arrow = 0;
+	while (arrow != 5)
+	{
+		Sleep(10);
+		arrow = dispatcher->s_pop_latest_message_or_return_0(MENU_MSG_CODE);
+	}
+	system("cls");
 }
 
 void main_menu::new_file()

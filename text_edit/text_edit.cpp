@@ -20,11 +20,13 @@ int main()
 	while (true)
 	{
 		menu.displaymenu();
-		std::cout << "I'm still here!" << std::endl;
-		Sleep(0.2 SECOND);
 		if (main_dispatch.is_shutting_down())
 		{
-			break;
+			if(main_buffer.ready_for_exit() && file_handle.ready_for_exit())
+			{
+				exit(EXIT_SUCCESS);
+			}
 		}
 	}
+
 }

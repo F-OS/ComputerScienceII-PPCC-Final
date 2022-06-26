@@ -8,6 +8,7 @@ public:
 	explicit text_buffer(const dispatch& dispatch);
 	text_buffer(dispatch& dispatch);
 	dispatch* dispatcher;
+	bool ready_for_exit();
 };
 
 #endif

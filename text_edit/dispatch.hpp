@@ -50,7 +50,12 @@ public:
 	dispatch& operator=(dispatch&& other) = delete;
 	dispatch& operator=(const dispatch&& other) = delete;
 	text_render* get_text_render();
-	
+	void update_screen_buffer();
+	CONSOLE_SCREEN_BUFFER_INFO get_cbsi();
+	COORD set_cursor(HANDLE& sb, int x, int y);
+	HANDLE open_screen_buf();
+	void close_screen_buf();
+
 	// Constructor & Destructor
 	dispatch();
 	~dispatch();
@@ -92,5 +97,7 @@ private:
 	std::vector<std::shared_ptr<key_press_handler>> hooked_keypresses;
 	std::thread* _kill;
 	std::shared_ptr<text_render*> text_render_obj;
+	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_cbsi;
+	HANDLE current_screen_buffer = nullptr;
 };
 #endif

@@ -51,6 +51,41 @@ text_render* dispatch::get_text_render()
 	return *text_render_obj.get();
 }
 
+void dispatch::update_screen_buffer()
+{
+	if(!current_screen_buffer)
+	{
+		open_screen_buf();
+	}
+	GetConsoleScreenBufferInfo(current_screen_buffer, &screen_buffer_cbsi);
+}
+
+CONSOLE_SCREEN_BUFFER_INFO dispatch::get_cbsi()
+{
+	update_screen_buffer();
+	return screen_buffer_cbsi;
+}
+
+COORD dispatch::set_cursor(HANDLE& sb, int x, int y)
+{
+	update_screen_buffer();
+	COORD newcursor{ static_cast<short>(x), static_cast<short>(y) };
+	SetConsoleCursorPosition(current_screen_buffer, newcursor);
+	COORD crs{ static_cast<short>(screen_buffer_cbsi.dwCursorPosition.X), static_cast<short>(screen_buffer_cbsi.dwCursorPosition.Y) };
+	return crs;
+}
+
+HANDLE dispatch::open_screen_buf()
+{
+	if(current_screen_buffer)
+	{
+		return current_screen_buffer;
+	}
+	current_screen_buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(current_screen_buffer);
+	return current_screen_buffer;
+}
+
 /*
  * Function: dispatch
  * Function Purpose: Initializes dispatch
