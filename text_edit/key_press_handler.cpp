@@ -51,9 +51,10 @@ bool forward_to_buffer::process_keypress(KEY_EVENT_RECORD keypress)
 	if ((keypress.wVirtualKeyCode >= KEY_PRESS_0 && keypress.wVirtualKeyCode <= KEY_PRESS_9) || (keypress.
 		wVirtualKeyCode >= KEY_PRESS_A && keypress.wVirtualKeyCode <= KEY_PRESS_Z))
 	{
-		if (((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u) || ((keypress.dwControlKeyState & RIGHT_ALT_PRESSED)
-			!= 0u) || ((keypress.
-				dwControlKeyState & LEFT_CTRL_PRESSED) != 0u) || ((keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u))
+		if (((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u) 
+			|| ((keypress.dwControlKeyState & RIGHT_ALT_PRESSED) != 0u) 
+			|| ((keypress.dwControlKeyState & LEFT_CTRL_PRESSED) != 0u) 
+			|| ((keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u))
 		{
 			return false; // We don't handle keypresseses with ctrl/alt keys.
 		}

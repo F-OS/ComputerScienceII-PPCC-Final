@@ -1,5 +1,5 @@
 ﻿#include "menu.hpp"
-
+#include "text_render.hpp"
 menu::menu(dispatch& dispatch) : dispatcher(&dispatch)
 {
 }
@@ -21,7 +21,19 @@ main_menu::main_menu(dispatch& dispatch_pass) : menu(dispatch_pass)
 
 void main_menu::help()
 {
-	std::cout << "I'm helping!" << std::endl;
+	std::string help_text = R"(
+	Welcome to Textedit, a console text editor!
+	This editor offers nano-style cursor control. You can navigate text using the four arrow keys,
+	the Page Up and Page Down keys,
+	the Home and End keys,
+	and by searching for text with CTRL-G
+	If you want to save and quit to the main menu, use CTRL-Q
+	Ctrl-C and Ctrl-V copy and paste, respectively.
+	If you need to immediately exit without saving, use CTRL-!
+	Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Final
+	To save your work, press CTRL-S, to save your work to a new directory, press CTRL-F
+	)";
+	dispatcher->get_text_render()->center_text(help_text);
 }
 
 void main_menu::new_file()

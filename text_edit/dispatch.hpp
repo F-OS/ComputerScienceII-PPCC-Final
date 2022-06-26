@@ -9,9 +9,11 @@
 #include <queue>
 #include <string>
 #include <thread>
-
 #include "Windows.h"
 #include "key_press_handler.hpp"
+
+class text_render;
+class key_press_handler;
 
 enum message_tags { BUFFER_MSG_CODE, MENU_MSG_CODE };
 
@@ -47,6 +49,8 @@ public:
 	dispatch(const dispatch& other) = delete;
 	dispatch& operator=(dispatch&& other) = delete;
 	dispatch& operator=(const dispatch&& other) = delete;
+	text_render* get_text_render();
+	
 	// Constructor & Destructor
 	dispatch();
 	~dispatch();
@@ -57,6 +61,7 @@ public:
 	void set_console_mode(int stream, DWORD bitflags);
 	bool console_has_input_buffered();
 	INPUT_RECORD* get_console_input_array(unsigned long& buffer_length);
+	COORD get_window_size();
 	// pseudomutex functions
 	bool get_lock_on_key_state() const;
 	void lock_key_state();
@@ -86,5 +91,6 @@ private:
 	DWORD old_console_mode_stderr = 0;
 	std::vector<std::shared_ptr<key_press_handler>> hooked_keypresses;
 	std::thread* _kill;
+	std::shared_ptr<text_render*> text_render_obj;
 };
 #endif

@@ -1,4 +1,5 @@
 #include "dispatch.hpp"
+#include "text_render.hpp"
 
 /*
  * Function: exit_program
@@ -45,6 +46,11 @@ dispatch::~dispatch()
 	_kill->join();
 }
 
+text_render* dispatch::get_text_render()
+{
+	return *text_render_obj.get();
+}
+
 /*
  * Function: dispatch
  * Function Purpose: Initializes dispatch
@@ -56,6 +62,8 @@ dispatch::~dispatch()
  */
 dispatch::dispatch()
 {
+	text_render* tr = new text_render(*this);
+	text_render_obj = std::make_shared<text_render*>(tr);
 	hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
 	hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
 	hooked_keypresses.push_back(std::make_shared<menu_hooked_keys>(*this));
@@ -232,6 +240,12 @@ INPUT_RECORD* dispatch::get_console_input_array(unsigned long& buffer_length)
 	return buffer;
 }
 
+COORD dispatch::get_window_size()
+{
+	auto* const stream_handle = request_io_handle(0);
+	return GetLargestConsoleWindowSize(stream_handle);
+}
+
 /*
  * Function: get_lock_on_key_state
  * Function Purpose: Return a lock on the keyboard state.
@@ -314,7 +328,7 @@ void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypres
 			{
 				handler_check++;
 			}
-			if (handler_check == hooked_keypresses.size())
+			if (handler_check == hooked_keypresses.size() && key.bKeyDown != true)
 			{
 				throw std::runtime_error("Unhandled keypress. Keypress code:" + key.wVirtualScanCode);
 			}

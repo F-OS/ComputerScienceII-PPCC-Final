@@ -11,7 +11,6 @@ int main()
 {
 	dispatch main_dispatch;
 	std::string path = R"(C:\Users\Reagan Fischer\source\repos\text_editor\text_editor\gutenberg)";
-	text_render main_render(main_dispatch);
 	text_buffer main_buffer(main_dispatch);
 	input_tracker input(main_dispatch);
 	main_menu menu(main_dispatch);
