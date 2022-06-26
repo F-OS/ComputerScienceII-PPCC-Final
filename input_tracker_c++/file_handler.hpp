@@ -15,7 +15,7 @@ public:
 
 private:
 	std::string file_path;
-	std::unique_ptr<FILE, decltype(&fclose)> current_handle{nullptr, &fclose};
+	std::unique_ptr<FILE, decltype(&fclose)> current_handle{ nullptr, &fclose };
 	dispatch* dispatcher;
 };
 

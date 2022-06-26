@@ -1,6 +1,3 @@
-
-
-
 #include "input_tracker.hpp"
 
 input_tracker::input_tracker(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)

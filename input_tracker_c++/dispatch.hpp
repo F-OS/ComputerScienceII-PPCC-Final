@@ -13,8 +13,7 @@
 #include "Windows.h"
 #include "key_press_handler.hpp"
 
-enum message_tags {BUFFER_MSG_CODE, MENU_MSG_CODE};
-
+enum message_tags { BUFFER_MSG_CODE, MENU_MSG_CODE };
 
 /*
  * Class: dispatch
@@ -43,7 +42,6 @@ enum message_tags {BUFFER_MSG_CODE, MENU_MSG_CODE};
 class dispatch
 {
 public:
-	
 	// Overridden copy and move functions. Dispatch should never be copied or moved due to the risk of creating an inconsistent state.
 	dispatch(dispatch&& other) = delete;
 	dispatch(const dispatch& other) = delete;

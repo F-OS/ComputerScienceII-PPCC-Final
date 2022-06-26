@@ -1,7 +1,4 @@
-﻿
-
-
-#include "text_render.hpp"
+﻿#include "text_render.hpp"
 
 text_render::text_render(dispatch& dispatch)
 {

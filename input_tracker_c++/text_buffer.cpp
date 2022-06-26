@@ -1,7 +1,4 @@
-﻿
-
-
-#include "text_buffer.hpp"
+﻿#include "text_buffer.hpp"
 
 text_buffer::text_buffer(dispatch& dispatch)
 {

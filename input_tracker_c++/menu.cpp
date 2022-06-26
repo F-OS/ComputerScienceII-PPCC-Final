@@ -1,7 +1,4 @@
-﻿
-
-
-#include "menu.hpp"
+﻿#include "menu.hpp"
 
 menu::menu(dispatch& dispatch) : dispatcher(&dispatch)
 {
@@ -49,9 +46,8 @@ void main_menu::displaymenu()
 	menufunctions[response - 1].second();
 }
 
-
 int menu::menu_renderer(const std::string& menu_name, const std::string& menu_prefix, const std::string& menu_cursor,
-                        const std::vector<std::string>& items) const
+	const std::vector<std::string>& items) const
 {
 	int tmp = 0;
 	int chosen_opt = 1;
@@ -101,7 +97,6 @@ int menu::menu_renderer(const std::string& menu_name, const std::string& menu_pr
 		arrow_old = arrow;
 		arrow = 0;
 		system("cls");
-	}
-	while (arrow_old != 5);
+	} while (arrow_old != 5);
 	return chosen_opt;
 }

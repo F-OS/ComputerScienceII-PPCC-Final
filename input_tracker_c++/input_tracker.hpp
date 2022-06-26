@@ -19,5 +19,4 @@ private:
 	bool killflag = false;
 };
 
-
 #endif

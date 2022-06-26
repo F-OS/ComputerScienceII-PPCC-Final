@@ -21,14 +21,14 @@ public:
 protected:
 	dispatch* dispatcher;
 	explicit menu(dispatch& dispatch);
-	int menu_renderer(const std::string& menu_name, const std::string& menu_prefix, const std::string& menu_cursor, const std::vector<std::string>& items) const;
+	int menu_renderer(const std::string& menu_name, const std::string& menu_prefix, const std::string& menu_cursor,
+		const std::vector<std::string>& items) const;
 	std::string name;
 	std::string prefix;
 	std::string cursor;
 	std::vector<std::pair<std::string, std::function<void()>>> menufunctions;
 	std::vector<std::string> menu_items;
 };
-
 
 class main_menu : public menu
 {

@@ -1,6 +1,5 @@
 #include "dispatch.hpp"
 
-
 /*
  * Function: exit_program
  * Function Purpose: Exits the program.
@@ -173,7 +172,7 @@ void dispatch::load_old_console_mode()
  * Function Purpose: Sets bitflags on standard input/output/error
  * Arguments:
  *	 stream - int: The number of the stream, 0 is standard output, 1 is standard input, 2 is standard error.
- *	 bitflags - DWORD: 64 bit unsigned long holding a set of bitflags. Further documentation at https://docs.microsoft.com/en-us/windows/console/setconsolemode 
+ *	 bitflags - DWORD: 64 bit unsigned long holding a set of bitflags. Further documentation at https://docs.microsoft.com/en-us/windows/console/setconsolemode
  * Function Flow:
  * The function first establishes a handle to the requested stream.
  * The function then sets the flags provided in bitflags and exits.
@@ -209,7 +208,6 @@ bool dispatch::console_has_input_buffered()
 	GetNumberOfConsoleInputEvents(stream_handle, &number_of_events);
 	return number_of_events != 0;
 }
-
 
 /*
  * Function: get_console_input_array
@@ -248,7 +246,6 @@ bool dispatch::get_lock_on_key_state() const
 {
 	return reading_key_state;
 }
-
 
 /*
  * Function: lock_key_state
@@ -317,7 +314,7 @@ void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypres
 			{
 				handler_check++;
 			}
-			if(handler_check == hooked_keypresses.size())
+			if (handler_check == hooked_keypresses.size())
 			{
 				throw std::runtime_error("Unhandled keypress. Keypress code:" + key.wVirtualScanCode);
 			}
@@ -342,7 +339,6 @@ void dispatch::c_new_message(char p, message_tags target)
 {
 	cmessages.push(std::make_pair(p, target));
 }
-
 
 /*
  * Function: c_pop_latest_msg_or_return_0

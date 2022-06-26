@@ -13,7 +13,6 @@ dispatch* key_press_handler::get_dispatcher()
 	return dispatcher;
 }
 
-
 bool key_press_handler::process_keypress(KEY_EVENT_RECORD keypress)
 {
 	if (keypress.bKeyDown != 0)
@@ -54,7 +53,7 @@ bool forward_to_buffer::process_keypress(KEY_EVENT_RECORD keypress)
 	{
 		if (((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u) || ((keypress.dwControlKeyState & RIGHT_ALT_PRESSED)
 			!= 0u) || ((keypress.
-			dwControlKeyState & LEFT_CTRL_PRESSED) != 0u) || ((keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u))
+				dwControlKeyState & LEFT_CTRL_PRESSED) != 0u) || ((keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u))
 		{
 			return false; // We don't handle keypresseses with ctrl/alt keys.
 		}
@@ -68,7 +67,7 @@ void forward_to_buffer::call_functions(const KEY_EVENT_RECORD& keypress)
 {
 	BYTE keybuf[4];
 	BYTE keyboard_state[sizeof(KEYARRAY)];
-	if(!GetKeyboardState(keyboard_state))
+	if (!GetKeyboardState(keyboard_state))
 	{
 		throw std::runtime_error("Failed to get keyboard state.");
 	}
@@ -82,7 +81,8 @@ bool menu_hooked_keys::process_keypress(KEY_EVENT_RECORD keypress)
 	{
 		return false;
 	}
-	if ((keypress.wVirtualKeyCode >= KEY_PRESS_LEFT_ARROW && keypress.wVirtualKeyCode <= KEY_PRESS_DOWN_ARROW) || keypress
+	if ((keypress.wVirtualKeyCode >= KEY_PRESS_LEFT_ARROW && keypress.wVirtualKeyCode <= KEY_PRESS_DOWN_ARROW) ||
+		keypress
 		.wVirtualKeyCode == KEY_PRESS_ENTER)
 	{
 		call_functions(keypress);
