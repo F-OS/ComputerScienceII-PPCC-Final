@@ -1,6 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "key_press_handler.h"
 
 key_press_handler::key_press_handler(dispatch& disp, bool ctrl, bool alt, int key)
@@ -99,19 +96,19 @@ void menu_hooked_keys::call_functions(const KEY_EVENT_RECORD& keypress)
 	switch (keypress.wVirtualKeyCode)
 	{
 	case KEY_PRESS_LEFT_ARROW:
-		get_dispatcher()->menu_pass_key(LEFT_ARROW);
+		get_dispatcher()->s_new_message(LEFT_ARROW, MENU_MSG_CODE);
 		break;
 	case KEY_PRESS_RIGHT_ARROW:
-		get_dispatcher()->menu_pass_key(RIGHT_ARROW);
+		get_dispatcher()->s_new_message(RIGHT_ARROW, MENU_MSG_CODE);
 		break;
 	case KEY_PRESS_UP_ARROW:
-		get_dispatcher()->menu_pass_key(UP_ARROW);
+		get_dispatcher()->s_new_message(UP_ARROW, MENU_MSG_CODE);
 		break;
 	case KEY_PRESS_DOWN_ARROW:
-		get_dispatcher()->menu_pass_key(DOWN_ARROW);
+		get_dispatcher()->s_new_message(DOWN_ARROW, MENU_MSG_CODE);
 		break;
 	case KEY_PRESS_ENTER:
-		get_dispatcher()->menu_pass_key(RETURN_PRESS);
+		get_dispatcher()->s_new_message(RETURN_PRESS, MENU_MSG_CODE);
 		break;
 	default:
 		throw std::runtime_error("Bad input for menu handler");

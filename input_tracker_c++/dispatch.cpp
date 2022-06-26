@@ -1,25 +1,60 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "dispatch.h"
 
 
+/*
+ * Function: exit_program
+ * Function Purpose: Exits the program.
+ * Arguments: No arguments.
+ * Function Flow:
+ *	This function sets a bool that calls the cleanup functions of every subsystem through a conditional in the main loop.
+ *	The function then spawns a thread to kill the program if cleanup goes over time.
+ * Return:
+ *	No returns.
+ * Throws:
+ *	No throws.
+ */
 void dispatch::exit_program()
 {
 	start_cleanup = true;
 	_kill = new std::thread(&dispatch::force_kill);
 }
 
+/*
+ * Function: is_shutting_down
+ * Function Purpose: Getter of start_cleanup
+ * Return:
+ *	 - bool:  start_cleanup
+ */
 bool dispatch::is_shutting_down() const
 {
 	return start_cleanup;
 }
 
+/*
+ * Function: ~dispatch
+ * Function Purpose: Destructor of dispatch
+ * Arguments: No arguments
+ * Function Flow:
+ *	This function joins the kill thread for posterity.
+ * Return:
+ *	N/A, joining kill exits the program.
+ * Throws:
+ *	No throws.
+ */
 dispatch::~dispatch()
 {
 	_kill->join();
 }
 
+/*
+ * Function: dispatch
+ * Function Purpose: Initializes dispatch
+ * Arguments: No arguments
+ * Function Flow:
+ *	This function pushes back derived classes of key_press_handler as shared_ptrs.
+ * Return: Constructor
+ * Throws: No throws
+ */
 dispatch::dispatch()
 {
 	hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
@@ -187,6 +222,7 @@ bool dispatch::console_has_input_buffered()
  *	Finally the function returns the buffer.
  * Return:
  *	 - INPUT_RECORD*: a pointer to the first member of the INPUT_RECORD array.
+ *	 - unsigned long ref: The length of the INPUT_RECORD array.
  * Throws:
  * No throws.
  */
@@ -198,12 +234,33 @@ INPUT_RECORD* dispatch::get_console_input_array(unsigned long& buffer_length)
 	return buffer;
 }
 
+/*
+ * Function: get_lock_on_key_state
+ * Function Purpose: Return a lock on the keyboard state.
+ * Arguments: None
+ * Function Flow:
+ *	this function returns the member field reading_key_state.
+ * Return:
+ *	 - bool: lock on keystate.
+ * Throws:
+ */
 bool dispatch::get_lock_on_key_state() const
 {
 	return reading_key_state;
 }
 
 
+/*
+ * Function: lock_key_state
+ * Function Purpose: Locks the keyboard state from modification in threads other than the one that called this function.
+ * Arguments: None
+ * Function Flow:
+ *	This function checks if a lock is already set, if so, it throws an exception as all functions calling lock_key_state should check for locks before calling.
+ *	If not, the function sets a lock.
+ * Return: Void function.
+ * Throws:
+ *	std::runtime_error - This funtion throws a runtime error if reading_key_state is set.
+ */
 void dispatch::lock_key_state()
 {
 	if (reading_key_state)
@@ -213,6 +270,17 @@ void dispatch::lock_key_state()
 	reading_key_state = true;
 }
 
+/*
+ * Function: unlock_key_state
+ * Function Purpose: Unlocks the keyboard state, allowing for modification.
+ * Arguments: None
+ * Function Flow:
+ *	This function checks if lock is unset, if so, it throws an exception as all functions calling unlock_key_state should have locked the key_state beforehand.
+ *	If not, the function resets the lock.
+ * Return: Void function.
+ * Throws:
+ *	std::runtime_error - This function throws a runtime error if reading_key_state is unset.
+ */
 void dispatch::unlock_key_state()
 {
 	if (!reading_key_state)
@@ -222,41 +290,21 @@ void dispatch::unlock_key_state()
 	reading_key_state = false;
 }
 
-unsigned char* dispatch::get_keyboard_state()
-{
-	if (reading_key_state)
-	{
-		int deadlock_counter = 0;
-		while (reading_key_state)
-		{
-			Sleep(1);
-			deadlock_counter++;
-			if (deadlock_counter > 1000)
-			{
-				throw std::runtime_error(
-					"Thread failed to return control of keyboard to dispatch within 1 second. Terminating.");
-			}
-		}
-	}
-	reading_key_state = true;
-	Sleep(10);
-	auto* const keystatemap = new unsigned char[256];
-	GetKeyboardState(keystatemap);
-	reading_key_state = false;
-	return keystatemap;
-}
-
 /*
  * Function: send_to_key_handler
- * Function Purpose: This function takes a vector of KEY_EVENTS and 
+ * Function Purpose: This function takes a list of keypresses and finds a handler for each of them.
  * Arguments:
- *	 keypresses - const std::vector<_KEY_EVENT_RECORD>&:
+ *	 keypresses - const std::vector<_KEY_EVENT_RECORD>&: A vector containing Windows KEY_EVENT_RECORDS
  * Function Flow:
+ *	This function loops through each key in the vector passed as an argument, then loops through each handler in hooked_keypresses and calls process_keypress.
  * Return:
+ *	Void function.
  * Throws:
+ *	std::runtime_error - This function throws a runtime error if a keypress is logged with no corresponding handler.
  */
 void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypresses) const
 {
+	int handler_check = 0;
 	for (const auto& key : keypresses)
 	{
 		for (const auto& kp : hooked_keypresses)
@@ -265,47 +313,127 @@ void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypres
 			{
 				break;
 			}
+			else
+			{
+				handler_check++;
+			}
+			if(handler_check == hooked_keypresses.size())
+			{
+				throw std::runtime_error("Unhandled keypress. Keypress code:" + key.wVirtualScanCode);
+			}
 		}
 	}
 }
 
-void dispatch::c_new_message(char p, int target)
+/*
+ * Function: c_new_message
+ * Function Purpose: This function sends a message to be asynchronously read by another program subsystem.
+ * Arguments:
+ *	 p - char: A character.
+ *	 target - message_tags: An enum to associate the message with a specific subsystem. 0 is text_buffer, 1 is menu, etc.
+ * Function Flow:
+ *	This function pushes a pair consisting of a char and int into the std::queue object for char messages.
+ * Return:
+ *	No returns.
+ * Throws:
+ *	No throws.
+ */
+void dispatch::c_new_message(char p, message_tags target)
 {
 	cmessages.push(std::make_pair(p, target));
 }
 
 
-char dispatch::c_pop_latest_msg_or_return_0(int who)
+/*
+ * Function: c_pop_latest_msg_or_return_0
+ * Function Purpose: Receive a message asynchronously added to the queue.
+ * Arguments:
+ *	 who - message_tags: The id of the class calling this function.
+ * Function Flow:
+ *	First, this function checks if the queue is empty. If so, it returns the 0-length c-string '\0'.
+ *	If not, it creates a pair from the last (most recent) item on the queue.
+ *	It then checks if the second element in that pair (the tag) matches the one passed to the function.
+ *	If so, it removes the item used to create the pair from the queue and returns the char.
+ * Return:
+ *	 - char: The message added to the queue or '\0' if the queue is empty.
+ * Throws:
+ *	No throws.
+ */
+char dispatch::c_pop_latest_msg_or_return_0(message_tags who)
 {
 	if (cmessages.empty())
 	{
 		return '\0';
 	}
-	const std::pair<char, int> c = cmessages.back();
+	const std::pair<char, message_tags> c = cmessages.back();
 	if (c.second == who)
 	{
 		cmessages.pop();
 		return c.first;
 	}
-	return 0;
+	return '\0';
 }
 
-void dispatch::menu_pass_key(short i)
+/*
+ * Function: s_new_message
+ * Function Purpose: c_new_message but for shorts.
+ * Arguments:
+ *	 i - short: a short to be added to the message queue.
+ *   target - message_tags: An enum to associate the message with a specific subsystem. 0 is text_buffer, 1 is menu, etc.
+ * Function Flow:
+ *	This function pushes a pair consisting of a short and int into the std::queue object for short messages.
+ * Return:
+ *	Void function
+ * Throws:
+ *	No throws.
+ */
+void dispatch::s_new_message(short i, message_tags who)
 {
-	last_menu_key.push(i);
+	smessages.push(std::make_pair(i, who));
 }
 
-short dispatch::menu_read_key()
+/*
+ * Function: s_pop_latest_message_or_return_0
+ * Function Purpose: Receive a message asynchronously added to the queue.
+ * Arguments:
+ *	 who - message_tags: The id of the class calling this function.
+ * Function Flow:
+ * 	First, this function checks if the queue is empty. If so, it returns the short 0.
+ *	If not, it creates a pair from the last (most recent) item on the queue.
+ *	It then checks if the second element in that pair (the tag) matches the one passed to the function.
+ *	If so, it removes the item used to create the pair from the queue and returns the short.
+ * Return:
+ *	 - short: The message added to the queue or 0 if the queue is empty.
+ * Throws:
+ *	No throws.
+ */
+short dispatch::s_pop_latest_message_or_return_0(message_tags who)
 {
-	if (last_menu_key.empty())
+	if (smessages.empty())
 	{
 		return 0;
 	}
-	const short last = last_menu_key.back();
-	last_menu_key.pop();
-	return last;
+	std::pair<short, message_tags> last = smessages.back();
+	if (last.second == who)
+	{
+		smessages.pop();
+		return last.first;
+	}
+	return 0;
 }
 
+/*
+ * Function: force_kill
+ * Function Purpose: Exit the program.
+ * Arguments: None
+ * Function Flow:
+ *	This function sleeps for 1 second to allow the file handler and text buffer to finish up their work.
+ *	The function then calls exit() if it hasn't already been called by text_edit.
+ * Return:
+ *	N/A exits the program.
+ * Throws:
+ *	No throws.
+ */
 void dispatch::force_kill()
 {
 	Sleep(1000);

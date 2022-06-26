@@ -1,6 +1,6 @@
-﻿// This is a personal academic project. Dear PVS-Studio, please check it.
+﻿
 
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "menu.h"
 
 menu::menu(dispatch& dispatch) : dispatcher(&dispatch)
@@ -96,7 +96,7 @@ int menu::menu_renderer(const std::string& menu_name, const std::string& menu_pr
 		while (arrow == 0)
 		{
 			Sleep(10);
-			arrow = dispatcher->menu_read_key();
+			arrow = dispatcher->s_pop_latest_message_or_return_0(MENU_MSG_CODE);
 		}
 		arrow_old = arrow;
 		arrow = 0;
