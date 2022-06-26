@@ -11,7 +11,7 @@
 #include <thread>
 
 #include "Windows.h"
-#include "key_press_handler.h"
+#include "key_press_handler.hpp"
 
 enum message_tags {BUFFER_MSG_CODE, MENU_MSG_CODE};
 

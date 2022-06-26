@@ -1,6 +1,6 @@
 ﻿#ifndef TEXT_BUFFER_H
 #define TEXT_BUFFER_H
-#include "dispatch.h"
+#include "dispatch.hpp"
 
 class text_buffer
 {

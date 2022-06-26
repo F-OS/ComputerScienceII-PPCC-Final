@@ -1,4 +1,4 @@
-#include "key_press_handler.h"
+#include "key_press_handler.hpp"
 
 key_press_handler::key_press_handler(dispatch& disp, bool ctrl, bool alt, int key)
 {

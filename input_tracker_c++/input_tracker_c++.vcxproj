@@ -143,14 +143,14 @@
     <ClCompile Include="text_render.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dispatch.h" />
-    <ClInclude Include="file_handler.h" />
-    <ClInclude Include="input_tracker.h" />
-    <ClInclude Include="Keytable.h" />
-    <ClInclude Include="key_press_handler.h" />
-    <ClInclude Include="menu.h" />
-    <ClInclude Include="text_buffer.h" />
-    <ClInclude Include="text_render.h" />
+    <ClInclude Include="dispatch.hpp" />
+    <ClInclude Include="file_handler.hpp" />
+    <ClInclude Include="input_tracker.hpp" />
+    <ClInclude Include="Keytable.hpp" />
+    <ClInclude Include="key_press_handler.hpp" />
+    <ClInclude Include="menu.hpp" />
+    <ClInclude Include="text_buffer.hpp" />
+    <ClInclude Include="text_render.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include=".gitignore" />

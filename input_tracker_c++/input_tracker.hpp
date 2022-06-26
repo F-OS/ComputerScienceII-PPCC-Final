@@ -4,7 +4,7 @@
 #include <string>
 #include <thread>
 
-#include "dispatch.h"
+#include "dispatch.hpp"
 
 class input_tracker
 {

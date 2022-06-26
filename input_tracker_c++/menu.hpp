@@ -4,7 +4,7 @@
 #include <string>
 #include <conio.h>
 #include <iostream>
-#include "dispatch.h"
+#include "dispatch.hpp"
 
 class menu
 {

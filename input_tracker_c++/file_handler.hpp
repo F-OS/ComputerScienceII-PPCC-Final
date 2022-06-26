@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-#include "dispatch.h"
+#include "dispatch.hpp"
 
 class file_handler
 {

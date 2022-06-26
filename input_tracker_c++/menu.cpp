@@ -1,7 +1,7 @@
 ﻿
 
 
-#include "menu.h"
+#include "menu.hpp"
 
 menu::menu(dispatch& dispatch) : dispatcher(&dispatch)
 {

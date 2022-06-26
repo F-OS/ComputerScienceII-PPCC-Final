@@ -1,12 +1,12 @@
 
 
 
-#include "dispatch.h"
-#include "file_handler.h"
-#include "input_tracker.h"
-#include "menu.h"
-#include "text_buffer.h"
-#include "text_render.h"
+#include "dispatch.hpp"
+#include "file_handler.hpp"
+#include "input_tracker.hpp"
+#include "menu.hpp"
+#include "text_buffer.hpp"
+#include "text_render.hpp"
 
 #define SECOND * 1000
 

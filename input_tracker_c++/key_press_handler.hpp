@@ -2,8 +2,8 @@
 #define KEY_PRESS_HANDLER_H
 #include <Windows.h>
 #include <iostream>
-#include "dispatch.h"
-#include "Keytable.h"
+#include "dispatch.hpp"
+#include "Keytable.hpp"
 class dispatch;
 
 class key_press_handler

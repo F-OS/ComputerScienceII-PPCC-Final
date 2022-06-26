@@ -1,6 +1,6 @@
 ﻿#ifndef TEXT_RENDER_H
 #define TEXT_RENDER_H
-#include "dispatch.h"
+#include "dispatch.hpp"
 
 class text_render
 {
