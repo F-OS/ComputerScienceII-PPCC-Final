@@ -23,7 +23,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{f6770e08-cc84-4960-b611-faa9d2eecd8c}</ProjectGuid>
-    <RootNamespace>inputtrackerc</RootNamespace>
+    <RootNamespace>textedit</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>text_edit</ProjectName>
   </PropertyGroup>
