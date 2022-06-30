@@ -1,5 +1,6 @@
 ﻿#include "menu.hpp"
-#include "text_render.hpp"
+#include "text.hpp"
+#include "windowsapi.hpp"
 menu::menu(dispatch& dispatch) : dispatcher(&dispatch)
 {
 }
@@ -32,7 +33,7 @@ If you need to immediately exit without saving, use CTRL-!
 To save your work, press CTRL-S, to save your work to a new directory, press CTRL-F
 Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Final
 	)";
-	std::string center = dispatcher->get_text_render()->center_text(help_text);
+    std::string center = dispatcher->get_text_obj()->center_text(help_text);
 	std::cout << center;
 	short arrow = 0;
 	while (arrow != 5)
@@ -107,7 +108,7 @@ int menu::menu_renderer(const std::string& menu_name, const std::string& menu_pr
 			tmp++;
 		}
 		tmp = 0;
-		std::cout << format;
+        std::cout << format;
 		while (arrow == 0)
 		{
 			Sleep(10);

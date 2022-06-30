@@ -1,5 +1,5 @@
 #include "input_tracker.hpp"
-
+#include "windowsapi.hpp"
 input_tracker::input_tracker(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 {
 	tracker_thread = std::make_unique<std::thread>(std::thread(&input_tracker::Iinput_tracker_thread, this));
@@ -15,8 +15,8 @@ void input_tracker::Iinput_tracker_thread() const
 {
 	std::vector<KEY_EVENT_RECORD> keybuffer;
 	std::vector<WINDOW_BUFFER_SIZE_RECORD> windowbuffer;
-	dispatcher->save_console_mode();
-	dispatcher->set_console_mode(1, ENABLE_WINDOW_INPUT);
+    dispatcher->get_windows_api()->save_console_mode();
+    dispatcher->get_windows_api()->set_console_mode(1, ENABLE_WINDOW_INPUT);
 	unsigned long bufferlength = 0;
 	while (true)
 	{
@@ -28,10 +28,10 @@ void input_tracker::Iinput_tracker_thread() const
 		{
 			continue;
 		}
-		if (dispatcher->console_has_input_buffered())
+        if (dispatcher->get_windows_api()->console_has_input_buffered())
 		{
 			dispatcher->lock_key_state();
-			const INPUT_RECORD* inputbuf = dispatcher->get_console_input_array(bufferlength);
+            const INPUT_RECORD* inputbuf = dispatcher->get_windows_api()->get_console_input_array(bufferlength);
 			for (size_t i = 0; i < bufferlength; i++)
 			{
 				switch (inputbuf[i].EventType)

@@ -138,9 +138,9 @@
     <ClCompile Include="input_tracker.cpp" />
     <ClCompile Include="key_press_handler.cpp" />
     <ClCompile Include="menu.cpp" />
-    <ClCompile Include="text_buffer.cpp" />
     <ClCompile Include="text_edit.cpp" />
-    <ClCompile Include="text_render.cpp" />
+    <ClCompile Include="text.cpp" />
+    <ClCompile Include="Windows API.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dispatch.hpp" />
@@ -149,11 +149,14 @@
     <ClInclude Include="Keytable.hpp" />
     <ClInclude Include="key_press_handler.hpp" />
     <ClInclude Include="menu.hpp" />
-    <ClInclude Include="text_buffer.hpp" />
-    <ClInclude Include="text_render.hpp" />
+    <ClInclude Include="text.hpp" />
+    <ClInclude Include="windowsapi.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

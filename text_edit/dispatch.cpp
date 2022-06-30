@@ -1,6 +1,7 @@
 #include "dispatch.hpp"
-#include "text_render.hpp"
 
+#include "text.hpp"
+#include "windowsapi.hpp"
 /*
  * Function: exit_program
  * Function Purpose: Exits the program.
@@ -46,46 +47,23 @@ dispatch::~dispatch()
 	_kill->join();
 }
 
-text_render* dispatch::get_text_render()
+text* dispatch::get_text_obj()
 {
-	return *text_render_obj.get();
+    if (!text_obj)
+    {
+        text_obj = new text(*this);
+    }
+    return text_obj;
 }
 
-void dispatch::update_screen_buffer()
+windowsapi* dispatch::get_windows_api()
 {
-	if(!current_screen_buffer)
-	{
-		open_screen_buf();
-	}
-	GetConsoleScreenBufferInfo(current_screen_buffer, &screen_buffer_cbsi);
+    if (!windowsapihandle)
+    {
+        windowsapihandle = new windowsapi;
+    }
+    return windowsapihandle;
 }
-
-CONSOLE_SCREEN_BUFFER_INFO dispatch::get_cbsi()
-{
-	update_screen_buffer();
-	return screen_buffer_cbsi;
-}
-
-COORD dispatch::set_cursor(HANDLE& sb, int x, int y)
-{
-	update_screen_buffer();
-	COORD newcursor{ static_cast<short>(x), static_cast<short>(y) };
-	SetConsoleCursorPosition(current_screen_buffer, newcursor);
-	COORD crs{ static_cast<short>(screen_buffer_cbsi.dwCursorPosition.X), static_cast<short>(screen_buffer_cbsi.dwCursorPosition.Y) };
-	return crs;
-}
-
-HANDLE dispatch::open_screen_buf()
-{
-	if(current_screen_buffer)
-	{
-		return current_screen_buffer;
-	}
-	current_screen_buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	SetConsoleActiveScreenBuffer(current_screen_buffer);
-	return current_screen_buffer;
-}
-
 /*
  * Function: dispatch
  * Function Purpose: Initializes dispatch
@@ -97,189 +75,12 @@ HANDLE dispatch::open_screen_buf()
  */
 dispatch::dispatch()
 {
-	text_render* tr = new text_render(*this);
-	text_render_obj = std::make_shared<text_render*>(tr);
-	hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
+    hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
 	hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
 	hooked_keypresses.push_back(std::make_shared<menu_hooked_keys>(*this));
 	hooked_keypresses.push_back(std::make_shared<forward_to_buffer>(*this));
 }
 
-/*
- * Function: request_io_handle
- * Function Purpose: Return a handle to one of the standard windows console streams.
- * Arguments:
- *	stream: int - allows switching between streams:
- *		0 - return a handle to standard output.
- *		1 - return a handle to standard input.
- *		2 - return a handle to standard error.
- * Function Flow:
- *	This function switches based on the value of stream and checks if the requested handle exists.
- *	If not, it creates a new handle, stores it as an attribute, and returns it to the user.
- * Throws:
- *	out_of_range exception: throws if stream not between 0 and 2
- *	runtime_error: throws if windows refuses to allow it to lock the console's streams.
- */
-const HANDLE& dispatch::request_io_handle(int stream)
-{
-	switch (stream)
-	{
-	case 0:
-		if (output_handle == nullptr)
-		{
-			output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-		}
-		if (output_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return output_handle;
-	case 1:
-		if (input_handle == nullptr)
-		{
-			input_handle = GetStdHandle(STD_INPUT_HANDLE);
-		}
-		if (input_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return input_handle;
-	case 2:
-		if (error_handle == nullptr)
-		{
-			error_handle = GetStdHandle(STD_ERROR_HANDLE);
-		}
-		if (error_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return error_handle;
-	default:
-		throw std::out_of_range(
-			"This function requires an argument of int in range [0, 3]. Function request_io_handle. Provided arguments: "
-			+ std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-	}
-}
-
-/*
- * Function: save_console_mode
- * Function Purpose: Saves the console mode before modification by the program.
- * Function Flow:
- *	This function first secures three handles to each of the three streams.
- *	It then uses the GetConsoleMode function to load those streams into the old_console_mode buffers.
- * Return:
- *	void function
- * Throws:
- *	No throws
- */
-void dispatch::save_console_mode()
-{
-	auto* const stdio_mode = request_io_handle(0);
-	auto* const stdin_mode = request_io_handle(1);
-	auto* const stderr_mode = request_io_handle(2);
-	GetConsoleMode(stdin_mode, &old_console_mode_stdio);
-	GetConsoleMode(stdio_mode, &old_console_mode_stdin);
-	GetConsoleMode(stderr_mode, &old_console_mode_stderr);
-}
-
-/*
- * Function: load_old_console_mode
- * Function Purpose: Loads previously saved console states.
- * Arguments: No arguments.
- * Function Flow:
- *	This function first secures three handles to standard input/output/error.
- *	It then uses the SetConsoleMode function to load previously saved buffers into standard input/output/error.
- * Return:
- *	Void function
- * Throws:
- *	No throws
- */
-void dispatch::load_old_console_mode()
-{
-	const auto stdio_mode = request_io_handle(0);
-	const auto stdin_mode = request_io_handle(1);
-	const auto stderr_mode = request_io_handle(2);
-	SetConsoleMode(stdin_mode, old_console_mode_stdio);
-	SetConsoleMode(stdio_mode, old_console_mode_stdin);
-	SetConsoleMode(stderr_mode, old_console_mode_stderr);
-}
-
-/*
- * Function: set_console_mode
- * Function Purpose: Sets bitflags on standard input/output/error
- * Arguments:
- *	 stream - int: The number of the stream, 0 is standard output, 1 is standard input, 2 is standard error.
- *	 bitflags - DWORD: 64 bit unsigned long holding a set of bitflags. Further documentation at https://docs.microsoft.com/en-us/windows/console/setconsolemode
- * Function Flow:
- * The function first establishes a handle to the requested stream.
- * The function then sets the flags provided in bitflags and exits.
- * Return:
- * Void function
- * Throws:
- * No throws
- */
-void dispatch::set_console_mode(int stream, DWORD bitflags)
-{
-	auto* const stream_handle = request_io_handle(stream);
-	SetConsoleMode(stream_handle, bitflags);
-}
-
-/*
- * Function: console_has_input_buffered
- * Function Purpose: Tells the user if the console has input that can be read
- * Arguments:
- *	None
- * Function Flow:
- *	First the function secures a handle to standard input.
- *	Then it calls GetNumberOfConsoleInputEvents and saves that function's output to number_of_events.
- *	Finally it returns a boolean variable to indicate whether number_of_events is non-zero.
- * Return:
- *	 - bool: Does the console have input buffered?
- * Throws:
- *	No throws.
- */
-bool dispatch::console_has_input_buffered()
-{
-	unsigned long number_of_events = 0;
-	const HANDLE stream_handle = request_io_handle(1);
-	GetNumberOfConsoleInputEvents(stream_handle, &number_of_events);
-	return number_of_events != 0;
-}
-
-/*
- * Function: get_console_input_array
- * Function Purpose: Return an array of INPUT_RECORDs to the user for further processing.
- * Arguments:
- *	 buffer_length - unsigned long&: a reference to a variable that this function modifies to contain the length of the array buffer.
- * Function Flow:
- *	First this function secures a handle to standard output and dynamically initializes a buffer.
- *	Then this function calls ReadConsoleInput and fills that buffer with any INPUT_RECORDS that were in the console's queue.
- *	Finally the function returns the buffer.
- * Return:
- *	 - INPUT_RECORD*: a pointer to the first member of the INPUT_RECORD array.
- *	 - unsigned long ref: The length of the INPUT_RECORD array.
- * Throws:
- * No throws.
- */
-INPUT_RECORD* dispatch::get_console_input_array(unsigned long& buffer_length)
-{
-	auto* const stream_handle = request_io_handle(1);
-	auto* const buffer = new INPUT_RECORD[BUFSIZ];
-	ReadConsoleInput(stream_handle, buffer, BUFSIZ, &buffer_length);
-	return buffer;
-}
-
-COORD dispatch::get_window_size()
-{
-	auto* const stream_handle = request_io_handle(0);
-	return GetLargestConsoleWindowSize(stream_handle);
-}
 
 /*
  * Function: get_lock_on_key_state
