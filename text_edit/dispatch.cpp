@@ -1,5 +1,7 @@
 #include "dispatch.hpp"
 
+#include "input_tracker.hpp"
+#include "menu.hpp"
 #include "text.hpp"
 #include "windowsapi.hpp"
 /*
@@ -49,20 +51,21 @@ dispatch::~dispatch()
 
 text* dispatch::get_text_obj()
 {
-    if (!text_obj)
-    {
-        text_obj = new text(*this);
-    }
     return text_obj;
 }
 
 windowsapi* dispatch::get_windows_api()
 {
-    if (!windowsapihandle)
-    {
-        windowsapihandle = new windowsapi;
-    }
     return windowsapihandle;
+}
+bool dispatch::menu_in_control()
+{
+    return false;
+}
+void dispatch::spawn_menu()
+{
+    main_menu newmenu(*this);
+    newmenu.displaymenu();
 }
 /*
  * Function: dispatch
@@ -75,6 +78,9 @@ windowsapi* dispatch::get_windows_api()
  */
 dispatch::dispatch()
 {
+    in = new input_tracker(*this);
+    windowsapihandle = new windowsapi;
+    text_obj = new text(*this);
     hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
 	hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
 	hooked_keypresses.push_back(std::make_shared<menu_hooked_keys>(*this));

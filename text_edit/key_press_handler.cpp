@@ -78,13 +78,12 @@ void forward_to_buffer::call_functions(const KEY_EVENT_RECORD& keypress)
 
 bool menu_hooked_keys::process_keypress(KEY_EVENT_RECORD keypress)
 {
-	if (keypress.bKeyDown != 0)
+    if (keypress.bKeyDown != 0 || get_dispatcher()->menu_in_control())
 	{
 		return false;
 	}
 	if ((keypress.wVirtualKeyCode >= KEY_PRESS_LEFT_ARROW && keypress.wVirtualKeyCode <= KEY_PRESS_DOWN_ARROW) ||
-		keypress
-		.wVirtualKeyCode == KEY_PRESS_ENTER)
+        keypress.wVirtualKeyCode == KEY_PRESS_ENTER)
 	{
 		call_functions(keypress);
 		return true;

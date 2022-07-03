@@ -35,9 +35,14 @@ class main_menu : public menu
 public:
 	void help();
 	void new_file();
-	void open_file();
+
+    void text_buf_test();
+
+    void open_file();
 	void exit();
 	void displaymenu() override;
 	explicit main_menu(dispatch& dispatch);
+
+    bool exitflag = true;
 };
 #endif

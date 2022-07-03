@@ -9,12 +9,15 @@
 #include <queue>
 #include <string>
 #include <thread>
+
 #include "Windows.h"
 #include "key_press_handler.hpp"
 
 class windowsapi;
 class text;
 class key_press_handler;
+
+class input_tracker;
 
 enum message_tags { BUFFER_MSG_CODE, MENU_MSG_CODE };
 
@@ -56,6 +59,10 @@ public:
 
     windowsapi* get_windows_api();
 
+    bool menu_in_control();
+
+    void spawn_menu();
+
     // Constructor & Destructor
 	dispatch();
 	~dispatch();
@@ -96,5 +103,6 @@ private:
 	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_cbsi;
 	HANDLE current_screen_buffer = nullptr;
     windowsapi* windowsapihandle;
+    input_tracker* in;
 };
 #endif

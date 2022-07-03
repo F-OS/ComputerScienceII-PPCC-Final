@@ -2,13 +2,22 @@
 #include "windowsapi.hpp"
 input_tracker::input_tracker(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 {
-	tracker_thread = std::make_unique<std::thread>(std::thread(&input_tracker::Iinput_tracker_thread, this));
+    tracker_thread = std::thread(&input_tracker::Iinput_tracker_thread, this);
 }
 
 input_tracker::~input_tracker()
 {
 	killflag = true;
-	(*tracker_thread).join();
+    tracker_thread.join();
+}
+
+template <typename _Tp, typename _Alloc>
+inline bool operator==(
+    const std::vector<_Tp, _Alloc>& __lhs,
+    const std::vector<_Tp, _Alloc>& __rhs
+    )
+{
+    return __lhs._M_base() == __rhs._M_base();
 }
 
 void input_tracker::Iinput_tracker_thread() const

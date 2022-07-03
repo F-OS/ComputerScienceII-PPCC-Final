@@ -14,6 +14,7 @@ main_menu::main_menu(dispatch& dispatch_pass) : menu(dispatch_pass)
 	menufunctions.emplace_back("New File", std::bind(&main_menu::new_file, this));
 	menufunctions.emplace_back("Open File", std::bind(&main_menu::open_file, this));
 	menufunctions.emplace_back("Quit", std::bind(&main_menu::exit, this));
+    menufunctions.emplace_back("Test cool text wrap", std::bind(&main_menu::text_buf_test, this));
 	for (const auto& [first, second] : menufunctions)
 	{
 		menu_items.push_back(first);
@@ -47,11 +48,28 @@ Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Fi
 void main_menu::new_file()
 {
 	std::cout << "Out with the old, in with the new" << std::endl;
+    // exitflag = false;
+}
+
+void main_menu::text_buf_test()
+{
+    std::cout << "Text buffer test" << std::endl;
+    std::string reference_str =
+        R"(
+It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.
+The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', 
+making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text,
+and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years,
+sometimes by accident, sometimes on purpose (injected humour and the like).
+)";
+    dispatcher->get_text_obj()->load_string(reference_str);
+    dispatcher->get_text_obj()->blit_to_screen_from_internal_buffer();
 }
 
 void main_menu::open_file()
 {
 	std::cout << "Open sesame" << std::endl;
+    //	exitflag = false;
 }
 
 void main_menu::exit()
@@ -62,8 +80,12 @@ void main_menu::exit()
 
 void main_menu::displaymenu()
 {
-	const int response = menu_renderer("OPTIONS", "[*]", "->", menu_items);
-	menufunctions[response - 1].second();
+    int response;
+    while (exitflag)
+    {
+        response = menu_renderer("OPTIONS", "[*]", "->", menu_items);
+        menufunctions[response - 1].second();
+    }
 }
 
 int menu::menu_renderer(const std::string& menu_name, const std::string& menu_prefix, const std::string& menu_cursor,

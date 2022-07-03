@@ -3,7 +3,6 @@
 #include "input_tracker.hpp"
 #include "menu.hpp"
 #include "text.hpp"
-#include "text_buffer.hpp"
 
 #define SECOND * 1000
 

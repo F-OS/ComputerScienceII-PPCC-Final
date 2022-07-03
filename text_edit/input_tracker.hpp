@@ -15,7 +15,7 @@ public:
 private:
 	void Iinput_tracker_thread() const;
 	dispatch* dispatcher;
-	std::unique_ptr<std::thread> tracker_thread;
+    std::thread tracker_thread;
 	bool killflag = false;
 };
 

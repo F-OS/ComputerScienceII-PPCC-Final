@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "dispatch.hpp"
-#include "text_buffer.hpp"
+
 
 class file_handler
 {

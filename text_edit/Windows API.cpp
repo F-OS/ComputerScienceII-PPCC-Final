@@ -142,8 +142,7 @@ void windowsapi::set_console_mode(int stream, DWORD bitflags)
 bool windowsapi::console_has_input_buffered()
 {
 	unsigned long number_of_events = 0;
-	const HANDLE stream_handle = request_io_handle(1);
-	GetNumberOfConsoleInputEvents(stream_handle, &number_of_events);
+    GetNumberOfConsoleInputEvents(input_handle, &number_of_events);
 	return number_of_events != 0;
 }
 
@@ -174,7 +173,7 @@ COORD windowsapi::get_window_size()
 {
     update_screen_buffer();
     GetConsoleScreenBufferInfo(output_handle, cbsi);
-    return cbsi->dwSize;
+    return cbsi->dwMaximumWindowSize;
 }
 void windowsapi::update_screen_buffer()
 {
