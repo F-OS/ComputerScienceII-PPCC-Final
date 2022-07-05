@@ -17,7 +17,7 @@ main_menu::main_menu(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
     menufunctions.emplace_back("Help", std::bind(&main_menu::help, this));
     menufunctions.emplace_back("New File", std::bind(&main_menu::new_file, this));
     menufunctions.emplace_back("Open File", std::bind(&main_menu::open_file, this));
-    menufunctions.emplace_back("Quit", std::bind(&main_menu::exit, this));
+    menufunctions.emplace_back("Quit", std::bind(&main_menu::quit_menu, this));
     menufunctions.emplace_back("Test cool text wrap", std::bind(&main_menu::text_buf_test, this));
     for (const auto& [first, second] : menufunctions)
     {
@@ -39,7 +39,7 @@ To save your work, press CTRL-S, to save your work to a new directory, press CTR
 Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Final
 
 You can exit this window by pressing CTRL-Q, too!
-	)";
+)";
     const std::string center = dispatcher->get_text_obj()->center_text(help_text);
     std::cout << center;
     while (!dispatcher->is_return_to_main())
@@ -74,7 +74,7 @@ void main_menu::open_file()
     //	exitflag = false;
 }
 
-void main_menu::exit()
+void main_menu::quit_menu()
 {
     std::cout << "Goodbye!" << std::endl;
     dispatcher->exit_program();
@@ -140,7 +140,7 @@ int main_menu::menu_renderer(
         while (arrow == 0)
         {
             Sleep(10);
-            arrow = dispatcher->s_pop_latest_message_or_return_0(CURSOR_MOVEMENT_LISTENER);
+            arrow = dispatcher->s_pop_latest_message_or_return_0(message_tags::CURSOR_MOVEMENT_LISTENER);
         }
         arrow_old = arrow;
         arrow = 0;

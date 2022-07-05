@@ -40,7 +40,6 @@ private:
     CHAR_INFO* print_buf;
     COORD window;
     int currentoffset = 0;
-    SMALL_RECT* last_displayed;
 };
 
 #endif

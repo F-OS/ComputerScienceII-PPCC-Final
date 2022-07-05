@@ -9,7 +9,7 @@ windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
     request_io_handle(0);
     request_io_handle(1);
     request_io_handle(2);
-    if ((output_handle == nullptr) || (input_handle == nullptr) || (error_handle == nullptr))
+    if (output_handle == nullptr || input_handle == nullptr || error_handle == nullptr)
     {
         throw std::runtime_error("Failure to secure handle in windowsapi constructor.");
     }

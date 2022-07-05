@@ -41,15 +41,17 @@ void text::load_string(const std::string& string)
             const std::vector<std::string> blank{""};
             tmp2.displayable_substring = blank;
             string_objs.push_back(tmp2);
-            continue;
         }
-        string_data tmp2;
-        tmp2.line = tmp;
-        for (int i = 0; i < tmp2.line.length(); i += window.X - 1)
+        else
         {
-            tmp2.displayable_substring.push_back(tmp2.line.substr(i, window.X - 1));
+            string_data tmp2;
+            tmp2.line = tmp;
+            for (int i = 0; i < tmp2.line.length(); i += window.X - 1)
+            {
+                tmp2.displayable_substring.push_back(tmp2.line.substr(i, window.X - 1));
+            }
+            string_objs.push_back(tmp2);
         }
-        string_objs.push_back(tmp2);
     }
 }
 void text::set_cursor_pos(int x_pos, int y_pos)
@@ -61,7 +63,11 @@ void text::set_cursor_pos(int x_pos, int y_pos)
 }
 SHORT text::get_length_at(int y_loc)
 {
-    return string_objs.size() <= max(y_loc - 1, 0) ? 0 : string_objs[y_loc].displayable_substring[0].length();
+    if (string_objs.size() <= max(y_loc - 1, 0))
+    {
+        return 0;
+    }
+    return string_objs[y_loc].displayable_substring[0].length();
 }
 void text::do_scroll(int i)
 {

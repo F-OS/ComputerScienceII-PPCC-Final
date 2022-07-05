@@ -18,7 +18,7 @@ public:
 
     main_menu& operator=(main_menu&& other) = delete;
 
-    explicit main_menu(dispatch& dispatch);
+    explicit main_menu(dispatch& dispatch_pass);
 
     void help();
 
@@ -28,7 +28,7 @@ public:
 
     void open_file();
 
-    void exit();
+    void quit_menu();
 
     void displaymenu();
 

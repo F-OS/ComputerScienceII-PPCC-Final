@@ -13,7 +13,7 @@
  * Function: is_shutting_down
  * Function Purpose: Getter of start_cleanup
  * Return:
- *	 - bool:  start_cleanup
+ *  - bool:  start_cleanup
  */
 bool dispatch::is_shutting_down() const
 {
@@ -89,7 +89,7 @@ dispatch::dispatch()
     in = std::make_unique<input_tracker*>(new input_tracker(*this));
     text_obj = std::make_unique<text*>(new text(*this));
     hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
-    hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
+    //hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this)); TODO implement ctrl-c
     hooked_keypresses.push_back(std::make_shared<cursor_movement_related_keys>(*this));
     hooked_keypresses.push_back(std::make_shared<forward_to_buffer>(*this));
 }

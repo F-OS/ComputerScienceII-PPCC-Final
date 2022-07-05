@@ -3,6 +3,7 @@
 #include <memory>
 #include <queue>
 
+#include "cursor.h"
 #include "key_press_handler.hpp"
 #include "mainhead.h"
 class cursor;
@@ -82,8 +83,6 @@ public:
 
     // Functions for terminating the program
     void exit_program();
-
-    static void force_kill();
 
     // Pure Getters and setters
     bool is_shutting_down() const;

@@ -10,7 +10,7 @@ file_handler::file_handler(std::string path) : file_path(std::move(path))
 
 int file_handler::open(const std::string& path)
 {
-    if ((current_handle.get() != nullptr) && file_path != path)
+    if (current_handle.get() != nullptr && file_path != path)
     {
         fclose(current_handle.get());
         current_handle.reset(nullptr);

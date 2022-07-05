@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
-
-#include "dispatch.hpp"
+#include "mainhead.h"
+#include "Windows.h"
 
 
 class cursor
