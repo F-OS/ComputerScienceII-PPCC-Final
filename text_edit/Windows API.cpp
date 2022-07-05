@@ -9,7 +9,7 @@ windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
     request_io_handle(0);
     request_io_handle(1);
     request_io_handle(2);
-    if (!output_handle || !input_handle || !error_handle)
+    if ((output_handle == nullptr) || (input_handle == nullptr) || (error_handle == nullptr))
     {
         throw std::runtime_error("Failure to secure handle in windowsapi constructor.");
     }
@@ -20,17 +20,17 @@ windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
     save_console_mode();
     set_console_mode(1, ENABLE_WINDOW_INPUT);
 
-    int window_type = GWL_STYLE;
-    auto current_state = GetWindowLong(consolewindowhandle, window_type);
+    const int window_type = GWL_STYLE;
+    const auto current_state = GetWindowLong(consolewindowhandle, window_type);
     SetWindowLong(consolewindowhandle, window_type, current_state & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 
-    SMALL_RECT window_size{0,0,121,30};
-    COORD buffer_size{121,30};
+    const SMALL_RECT window_size{0,0,121,30};
+    const COORD buffer_size{121,30};
     SetConsoleTitleA("TextEdit");
-    SetConsoleWindowInfo(output_handle, true, &window_size);
+    SetConsoleWindowInfo(output_handle, 1, &window_size);
     SetConsoleScreenBufferSize(output_handle, buffer_size);
 
-    cursorhandle.bVisible = false;
+    cursorhandle.bVisible = 0;
     SetConsoleCursorInfo(output_handle, &cursorhandle);
 }
 /*
@@ -180,7 +180,7 @@ bool windowsapi::console_has_input_buffered()
 INPUT_RECORD* windowsapi::get_console_input_array(unsigned long& buffer_length)
 {
     auto* const stream_handle = request_io_handle(1);
-    auto buffer = new INPUT_RECORD[BUFSIZ];
+    const auto buffer = new INPUT_RECORD[BUFSIZ];
     ReadConsoleInput(stream_handle, buffer, BUFSIZ, &buffer_length);
     return buffer;
 }
@@ -211,7 +211,7 @@ COORD windowsapi::get_cursor()
 COORD windowsapi::set_cursor(int x, int y)
 {
     update_screen_buffer();
-    COORD oldcursor = (*cbsi)->dwCursorPosition;
+    const COORD oldcursor = (*cbsi)->dwCursorPosition;
     SetConsoleCursorPosition(request_io_handle(0), COORD{static_cast<short>(x),static_cast<short>(y)});
     dispatcher->get_text_obj()->set_cursor_pos(x, y);
     return oldcursor;

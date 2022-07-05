@@ -259,7 +259,7 @@ short dispatch::s_pop_latest_message_or_return_0(message_tags who)
     {
         return 0;
     }
-    std::pair<short, message_tags> last = smessages.back();
+    const std::pair<short, message_tags> last = smessages.back();
     if (last.second == who)
     {
         smessages.pop();

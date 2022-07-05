@@ -2,7 +2,7 @@
 #include "stdio.h"
 file_handler::file_handler(std::string path) : file_path(std::move(path))
 {
-    if (!file_path.length())
+    if (file_path.length() == 0u)
     {
         open(file_path);
     }
@@ -10,19 +10,19 @@ file_handler::file_handler(std::string path) : file_path(std::move(path))
 
 int file_handler::open(const std::string& path)
 {
-    if (current_handle.get() && file_path != path)
+    if ((current_handle.get() != nullptr) && file_path != path)
     {
         fclose(current_handle.get());
         current_handle.reset(nullptr);
     }
     FILE* f = nullptr;
     file_path = path;
-    if (!file_path.length())
+    if (file_path.length() == 0u)
     {
         return -1;
     }
-    errno_t err = fopen_s(&f, file_path.c_str(), "r");
-    if (!err)
+    const errno_t err = fopen_s(&f, file_path.c_str(), "r");
+    if (err == 0)
     {
         fclose(f);
         fopen_s(&f, file_path.c_str(), "r+");

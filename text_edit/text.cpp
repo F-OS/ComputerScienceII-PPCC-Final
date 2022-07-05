@@ -18,10 +18,9 @@ std::string text::center_text(const std::string& str)
     std::string tmp;
     std::string newstr;
     int i = 0;
-    int center_x = 0;
     while (std::getline(ss, tmp, '\n'))
     {
-        center_x = (window.X - tmp.size()) / 2;
+        int center_x = (window.X - tmp.size()) / 2;
         newstr += std::string(center_x, ' ') + tmp + '\n';
         i++;
     }
@@ -39,7 +38,7 @@ void text::load_string(const std::string& string)
         {
             string_data tmp2;
             tmp2.line = "";
-            std::vector<std::string> blank{""};
+            const std::vector<std::string> blank{""};
             tmp2.displayable_substring = blank;
             string_objs.push_back(tmp2);
             continue;
@@ -72,14 +71,14 @@ void text::do_scroll(int i)
 
 void text::blit_to_screen_from_internal_buffer()
 {
-    std::string full, tmp;
+    std::string full;
     for (int i = currentoffset; i < window.Y - 1; i++)
     {
         if (i >= string_objs.size())
         {
             break;
         }
-        tmp = string_objs[i].displayable_substring[0];
+        std::string tmp = string_objs[i].displayable_substring[0];
         tmp += std::string(window.X - string_objs[i].displayable_substring[0].length(), ' ');
         full.append(tmp);
     }
@@ -88,12 +87,10 @@ void text::blit_to_screen_from_internal_buffer()
 
 void text::load_attributes() const
 {
-    int array_x = 0;
-    int array_y = 0;
     for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
     {
-        array_x = array_pos % window.X;
-        array_y = floor(array_pos / window.X);
+        int array_x = array_pos % window.X;
+        int array_y = floor(array_pos / window.X);
         if (x_cursor_pos == array_x && y_cursor_pos == array_y)
         {
             print_buf[array_pos].Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED
@@ -125,7 +122,7 @@ void text::display_whole_buffer()
 }
 void text::print_to_whole_console(const std::string& basic_string)
 {
-    auto c_str = basic_string.c_str();
+    const auto c_str = basic_string.c_str();
     if (basic_string.length() > window.X * window.Y)
     {
         throw std::out_of_range("String longer than allowed window size passed to print to whole console.");

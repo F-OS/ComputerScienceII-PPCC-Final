@@ -21,9 +21,6 @@ void cursor::stop_thread()
 }
 void cursor::cursor_tracking_thread()
 {
-    int arrow = 0;
-    int newcursor_x = 0;
-    int newcursor_y = 0;
     while (true)
     {
         if (dispatcher->is_shutting_down() || quitflag)
@@ -31,11 +28,11 @@ void cursor::cursor_tracking_thread()
             break;
         }
         cursorloc = dispatcher->get_windows_api()->get_cursor();
-        arrow = dispatcher->s_pop_latest_message_or_return_0(CURSOR_MOVEMENT_LISTENER);
-        newcursor_x = cursorloc.X;
-        newcursor_y = cursorloc.Y;
+        int arrow = dispatcher->s_pop_latest_message_or_return_0(CURSOR_MOVEMENT_LISTENER);
+        int newcursor_x = cursorloc.X;
+        int newcursor_y = cursorloc.Y;
 
-        if (!arrow || dispatcher->get_lock_on_key_state())
+        if ((arrow == 0) || dispatcher->get_lock_on_key_state())
         {
             continue;
         }

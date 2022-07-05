@@ -23,14 +23,14 @@ bool key_press_handler::process_keypress(KEY_EVENT_RECORD keypress)
     }
     if (keypress.wVirtualKeyCode == req_keypress)
     {
-        if (req_alt_key && (keypress.dwControlKeyState & LEFT_ALT_PRESSED || keypress.dwControlKeyState &
-            RIGHT_ALT_PRESSED))
+        if (req_alt_key && (((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u) || ((keypress.dwControlKeyState &
+            RIGHT_ALT_PRESSED) != 0u)))
         {
             call_functions();
             return true;
         }
-        if (req_ctrl_key && (keypress.dwControlKeyState & LEFT_CTRL_PRESSED || keypress.dwControlKeyState &
-            RIGHT_CTRL_PRESSED))
+        if (req_ctrl_key && (((keypress.dwControlKeyState & LEFT_CTRL_PRESSED) != 0u) || ((keypress.dwControlKeyState &
+            RIGHT_CTRL_PRESSED) != 0u)))
         {
             call_functions();
             return true;
@@ -70,7 +70,7 @@ void forward_to_buffer::call_functions(const KEY_EVENT_RECORD& keypress)
 {
     BYTE keybuf[4];
     BYTE keyboard_state[sizeof(KEYARRAY)];
-    if (!GetKeyboardState(keyboard_state))
+    if (GetKeyboardState(keyboard_state) == 0)
     {
         throw std::runtime_error("Failed to get keyboard state.");
     }

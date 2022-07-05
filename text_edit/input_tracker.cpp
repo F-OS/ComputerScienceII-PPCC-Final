@@ -15,7 +15,6 @@ void input_tracker::input_tracker_thread() const
     std::vector<KEY_EVENT_RECORD> keybuffer;
     std::vector<WINDOW_BUFFER_SIZE_RECORD> windowbuffer;
 
-    INPUT_RECORD* inputbuf = nullptr;
     unsigned long bufferlength = 0;
     while (true)
     {
@@ -32,7 +31,7 @@ void input_tracker::input_tracker_thread() const
             continue;
         }
         dispatcher->lock_key_state();
-        inputbuf = dispatcher->get_windows_api()->get_console_input_array(bufferlength);
+        const INPUT_RECORD* inputbuf = dispatcher->get_windows_api()->get_console_input_array(bufferlength);
         for (size_t i = 0; i < bufferlength; i++)
         {
             switch (inputbuf[i].EventType)

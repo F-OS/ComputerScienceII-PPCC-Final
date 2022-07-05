@@ -9,7 +9,7 @@
 main_menu::main_menu(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 {
     dispatcher->get_file_obj()->open("C:\\Tools\\shakesphere.txt");
-    std::string reference_str = dispatcher->get_file_obj()->read();
+    const std::string reference_str = dispatcher->get_file_obj()->read();
     dispatcher->get_text_obj()->load_string(reference_str);
     name = "Main Menu";
     prefix = "~";
@@ -27,7 +27,7 @@ main_menu::main_menu(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 
 void main_menu::help()
 {
-    std::string help_text = R"(Welcome to Textedit, a console text editor!
+    const std::string help_text = R"(Welcome to Textedit, a console text editor!
 This editor offers nano-style cursor control. You can navigate text using the four arrow keys,
 the Page Up and Page Down keys,
 the Home and End keys,
@@ -40,7 +40,7 @@ Any issues can be reported at: https://github.com/F-OS/ComputerScienceII-PPCC-Fi
 
 You can exit this window by pressing CTRL-Q, too!
 	)";
-    std::string center = dispatcher->get_text_obj()->center_text(help_text);
+    const std::string center = dispatcher->get_text_obj()->center_text(help_text);
     std::cout << center;
     while (!dispatcher->is_return_to_main())
     {
@@ -82,8 +82,7 @@ void main_menu::exit()
 
 void main_menu::displaymenu()
 {
-    int response;
-    response = menu_renderer("OPTIONS", "[*]", "->", menu_items);
+    int response = menu_renderer("OPTIONS", "[*]", "->", menu_items);
     menufunctions[response - 1].second();
 }
 
