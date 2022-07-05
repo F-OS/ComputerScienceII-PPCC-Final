@@ -15,6 +15,7 @@ public:
 
 private:
     void cursor_tracking_thread();
+
     dispatch* dispatcher;
     std::thread tracker_thread;
     COORD cursorloc;

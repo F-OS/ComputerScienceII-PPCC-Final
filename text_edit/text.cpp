@@ -83,7 +83,7 @@ void text::blit_to_screen_from_internal_buffer()
         tmp += std::string(window.X - string_objs[i].displayable_substring[0].length(), ' ');
         full.append(tmp);
     }
-    text::print_to_whole_console(full);
+    print_to_whole_console(full);
 }
 
 void text::load_attributes() const
@@ -112,8 +112,8 @@ void text::display_whole_buffer()
     SMALL_RECT output_rect = {
         static_cast<short>(0),
         static_cast<short>(0),
-        static_cast<short>(window.X),
-        static_cast<short>(window.Y)
+        (window.X),
+        (window.Y)
     };
     WriteConsoleOutputA(
                         output_handle,

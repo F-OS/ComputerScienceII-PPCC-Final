@@ -188,12 +188,12 @@ INPUT_RECORD* windowsapi::get_console_input_array(unsigned long& buffer_length)
 COORD windowsapi::get_window_size()
 {
     update_screen_buffer();
-    GetConsoleScreenBufferInfo(output_handle, (*cbsi));
+    GetConsoleScreenBufferInfo(output_handle, *cbsi);
     return (*cbsi)->dwMaximumWindowSize;
 }
 void windowsapi::update_screen_buffer()
 {
-    GetConsoleScreenBufferInfo(output_handle, (*cbsi));
+    GetConsoleScreenBufferInfo(output_handle, *cbsi);
 }
 
 std::shared_ptr<CONSOLE_SCREEN_BUFFER_INFO*> windowsapi::get_cbsi()

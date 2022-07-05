@@ -23,14 +23,14 @@ bool key_press_handler::process_keypress(KEY_EVENT_RECORD keypress)
     }
     if (keypress.wVirtualKeyCode == req_keypress)
     {
-        if (req_alt_key && (((keypress.dwControlKeyState & LEFT_ALT_PRESSED)) || ((keypress.dwControlKeyState &
-            RIGHT_ALT_PRESSED))))
+        if (req_alt_key && (keypress.dwControlKeyState & LEFT_ALT_PRESSED || keypress.dwControlKeyState &
+            RIGHT_ALT_PRESSED))
         {
             call_functions();
             return true;
         }
-        if (req_ctrl_key && (((keypress.dwControlKeyState & LEFT_CTRL_PRESSED)) || ((keypress.dwControlKeyState &
-            RIGHT_CTRL_PRESSED))))
+        if (req_ctrl_key && (keypress.dwControlKeyState & LEFT_CTRL_PRESSED || keypress.dwControlKeyState &
+            RIGHT_CTRL_PRESSED))
         {
             call_functions();
             return true;
@@ -50,13 +50,13 @@ bool forward_to_buffer::process_keypress(KEY_EVENT_RECORD keypress)
     {
         return false;
     }
-    if ((keypress.wVirtualKeyCode >= KEY_PRESS_0 && keypress.wVirtualKeyCode <= KEY_PRESS_9) || (keypress.
-        wVirtualKeyCode >= KEY_PRESS_A && keypress.wVirtualKeyCode <= KEY_PRESS_Z))
+    if (keypress.wVirtualKeyCode >= KEY_PRESS_0 && keypress.wVirtualKeyCode <= KEY_PRESS_9 || keypress.
+        wVirtualKeyCode >= KEY_PRESS_A && keypress.wVirtualKeyCode <= KEY_PRESS_Z)
     {
-        if (((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u)
-            || ((keypress.dwControlKeyState & RIGHT_ALT_PRESSED) != 0u)
-            || ((keypress.dwControlKeyState & LEFT_CTRL_PRESSED) != 0u)
-            || ((keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u))
+        if ((keypress.dwControlKeyState & LEFT_ALT_PRESSED) != 0u
+            || (keypress.dwControlKeyState & RIGHT_ALT_PRESSED) != 0u
+            || (keypress.dwControlKeyState & LEFT_CTRL_PRESSED) != 0u
+            || (keypress.dwControlKeyState & RIGHT_CTRL_PRESSED) != 0u)
         {
             return false; // We don't handle keypresseses with ctrl/alt keys.
         }
@@ -84,7 +84,7 @@ bool cursor_movement_related_keys::process_keypress(KEY_EVENT_RECORD keypress)
     {
         return false;
     }
-    if ((keypress.wVirtualKeyCode >= KEY_PRESS_LEFT_ARROW && keypress.wVirtualKeyCode <= KEY_PRESS_DOWN_ARROW) ||
+    if (keypress.wVirtualKeyCode >= KEY_PRESS_LEFT_ARROW && keypress.wVirtualKeyCode <= KEY_PRESS_DOWN_ARROW ||
         keypress.wVirtualKeyCode == KEY_PRESS_ENTER)
     {
         call_functions(keypress);
@@ -98,25 +98,25 @@ void cursor_movement_related_keys::call_functions(const KEY_EVENT_RECORD& keypre
     switch (keypress.wVirtualKeyCode)
     {
         case KEY_PRESS_LEFT_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount/2); i++)
+            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
             {
                 get_dispatcher()->s_new_message(LEFT_ARROW, CURSOR_MOVEMENT_LISTENER);
             }
             break;
         case KEY_PRESS_RIGHT_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount/2); i++)
+            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
             {
                 get_dispatcher()->s_new_message(RIGHT_ARROW, CURSOR_MOVEMENT_LISTENER);
             }
             break;
         case KEY_PRESS_UP_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount/2); i++)
+            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
             {
                 get_dispatcher()->s_new_message(UP_ARROW, CURSOR_MOVEMENT_LISTENER);
             }
             break;
         case KEY_PRESS_DOWN_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount/2); i++)
+            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
             {
                 get_dispatcher()->s_new_message(DOWN_ARROW, CURSOR_MOVEMENT_LISTENER);
             }

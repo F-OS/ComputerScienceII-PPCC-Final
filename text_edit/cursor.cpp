@@ -34,12 +34,12 @@ void cursor::cursor_tracking_thread()
         arrow = dispatcher->s_pop_latest_message_or_return_0(CURSOR_MOVEMENT_LISTENER);
         newcursor_x = cursorloc.X;
         newcursor_y = cursorloc.Y;
-        
+
         if (!arrow || dispatcher->get_lock_on_key_state())
         {
             continue;
         }
-        
+
         if (arrow == LEFT_ARROW)
         {
             newcursor_x -= 1;
