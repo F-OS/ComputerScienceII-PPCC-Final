@@ -1,5 +1,38 @@
+#include <stdexcept>
+
+#include "dispatch.hpp"
+#include "text.hpp"
 #include "windowsapi.hpp"
 
+windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
+{
+    request_io_handle(0);
+    request_io_handle(1);
+    request_io_handle(2);
+    if (!output_handle || !input_handle || !error_handle)
+    {
+        throw std::runtime_error("Failure to secure handle in windowsapi constructor.");
+    }
+    cbsi = std::make_shared<CONSOLE_SCREEN_BUFFER_INFO*>(new CONSOLE_SCREEN_BUFFER_INFO);
+    consolewindowhandle = GetConsoleWindow();
+    GetConsoleCursorInfo(output_handle, &cursorhandle);
+
+    save_console_mode();
+    set_console_mode(1, ENABLE_WINDOW_INPUT);
+
+    int window_type = GWL_STYLE;
+    auto current_state = GetWindowLong(consolewindowhandle, window_type);
+    SetWindowLong(consolewindowhandle, window_type, current_state & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
+
+    SMALL_RECT window_size{0,0,121,30};
+    COORD buffer_size{121,30};
+    SetConsoleTitleA("TextEdit");
+    SetConsoleWindowInfo(output_handle, true, &window_size);
+    SetConsoleScreenBufferSize(output_handle, buffer_size);
+
+    cursorhandle.bVisible = false;
+    SetConsoleCursorInfo(output_handle, &cursorhandle);
+}
 /*
  * Function: request_io_handle
  * Function Purpose: Return a handle to one of the standard windows console streams.
@@ -13,53 +46,36 @@
  *	If not, it creates a new handle, stores it as an attribute, and returns it to the user.
  * Throws:
  *	out_of_range exception: throws if stream not between 0 and 2
- *	runtime_error: throws if windows refuses to allow it to lock the console's streams.
  */
 const HANDLE& windowsapi::request_io_handle(int stream)
 {
-	switch (stream)
-	{
-	case 0:
-		if (output_handle == nullptr)
-		{
-			output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-		}
-		if (output_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return output_handle;
-	case 1:
-		if (input_handle == nullptr)
-		{
-			input_handle = GetStdHandle(STD_INPUT_HANDLE);
-		}
-		if (input_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return input_handle;
-	case 2:
-		if (error_handle == nullptr)
-		{
-			error_handle = GetStdHandle(STD_ERROR_HANDLE);
-		}
-		if (error_handle == INVALID_HANDLE_VALUE)
-		{
-			throw std::runtime_error(
-				"Unable to lock console handle. Function request_io_handle. Provided arguments: " +
-				std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-		}
-		return error_handle;
-	default:
-		throw std::out_of_range(
-			"This function requires an argument of int in range [0, 3]. Function request_io_handle. Provided arguments: "
-			+ std::to_string(stream) + " Error location: " + __FILE__ + ", " + std::to_string(__LINE__));
-	}
+    switch (stream)
+    {
+        case 0:
+            if (output_handle == nullptr)
+            {
+                output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+            }
+            return output_handle;
+        case 1:
+            if (input_handle == nullptr)
+            {
+                input_handle = GetStdHandle(STD_INPUT_HANDLE);
+            }
+            return input_handle;
+        case 2:
+            if (error_handle == nullptr)
+            {
+                error_handle = GetStdHandle(STD_ERROR_HANDLE);
+            }
+            return error_handle;
+        default:
+            throw std::out_of_range(
+                                    "This function requires an argument of int in range [0, 3]. Function request_io_handle. Provided arguments: "
+                                    + std::to_string(stream) + " Error location: " + __FILE__ + ", " +
+                                    std::to_string(__LINE__)
+                                   );
+    }
 }
 
 /*
@@ -75,12 +91,12 @@ const HANDLE& windowsapi::request_io_handle(int stream)
  */
 void windowsapi::save_console_mode()
 {
-	auto* const stdio_mode = request_io_handle(0);
-	auto* const stdin_mode = request_io_handle(1);
-	auto* const stderr_mode = request_io_handle(2);
-	GetConsoleMode(stdin_mode, &old_console_mode_stdio);
-	GetConsoleMode(stdio_mode, &old_console_mode_stdin);
-	GetConsoleMode(stderr_mode, &old_console_mode_stderr);
+    auto* const stdio_mode = request_io_handle(0);
+    auto* const stdin_mode = request_io_handle(1);
+    auto* const stderr_mode = request_io_handle(2);
+    GetConsoleMode(stdin_mode, &old_console_mode_stdio);
+    GetConsoleMode(stdio_mode, &old_console_mode_stdin);
+    GetConsoleMode(stderr_mode, &old_console_mode_stderr);
 }
 
 /*
@@ -97,12 +113,12 @@ void windowsapi::save_console_mode()
  */
 void windowsapi::load_old_console_mode()
 {
-	const auto stdio_mode = request_io_handle(0);
-	const auto stdin_mode = request_io_handle(1);
-	const auto stderr_mode = request_io_handle(2);
-	SetConsoleMode(stdin_mode, old_console_mode_stdio);
-	SetConsoleMode(stdio_mode, old_console_mode_stdin);
-	SetConsoleMode(stderr_mode, old_console_mode_stderr);
+    const auto stdio_mode = request_io_handle(0);
+    const auto stdin_mode = request_io_handle(1);
+    const auto stderr_mode = request_io_handle(2);
+    SetConsoleMode(stdin_mode, old_console_mode_stdio);
+    SetConsoleMode(stdio_mode, old_console_mode_stdin);
+    SetConsoleMode(stderr_mode, old_console_mode_stderr);
 }
 
 /*
@@ -121,8 +137,8 @@ void windowsapi::load_old_console_mode()
  */
 void windowsapi::set_console_mode(int stream, DWORD bitflags)
 {
-	auto* const stream_handle = request_io_handle(stream);
-	SetConsoleMode(stream_handle, bitflags);
+    auto* const stream_handle = request_io_handle(stream);
+    SetConsoleMode(stream_handle, bitflags);
 }
 
 /*
@@ -141,9 +157,9 @@ void windowsapi::set_console_mode(int stream, DWORD bitflags)
  */
 bool windowsapi::console_has_input_buffered()
 {
-	unsigned long number_of_events = 0;
+    unsigned long number_of_events = 0;
     GetNumberOfConsoleInputEvents(input_handle, &number_of_events);
-	return number_of_events != 0;
+    return number_of_events != 0;
 }
 
 /*
@@ -163,47 +179,40 @@ bool windowsapi::console_has_input_buffered()
  */
 INPUT_RECORD* windowsapi::get_console_input_array(unsigned long& buffer_length)
 {
-	auto* const stream_handle = request_io_handle(1);
-	auto* const buffer = new INPUT_RECORD[BUFSIZ];
-	ReadConsoleInput(stream_handle, buffer, BUFSIZ, &buffer_length);
-	return buffer;
+    auto* const stream_handle = request_io_handle(1);
+    auto buffer = new INPUT_RECORD[BUFSIZ];
+    ReadConsoleInput(stream_handle, buffer, BUFSIZ, &buffer_length);
+    return buffer;
 }
 
 COORD windowsapi::get_window_size()
 {
     update_screen_buffer();
-    GetConsoleScreenBufferInfo(output_handle, cbsi);
-    return cbsi->dwMaximumWindowSize;
+    GetConsoleScreenBufferInfo(output_handle, (*cbsi));
+    return (*cbsi)->dwMaximumWindowSize;
 }
 void windowsapi::update_screen_buffer()
 {
-    if (!input_handle || !output_handle || !error_handle || !cbsi)
-    {
-        request_io_handle(0);
-        request_io_handle(1);
-        request_io_handle(2);
-        cbsi = new CONSOLE_SCREEN_BUFFER_INFO;
-    }
-    GetConsoleScreenBufferInfo(output_handle, cbsi);
+    GetConsoleScreenBufferInfo(output_handle, (*cbsi));
 }
 
-CONSOLE_SCREEN_BUFFER_INFO windowsapi::get_cbsi()
+std::shared_ptr<CONSOLE_SCREEN_BUFFER_INFO*> windowsapi::get_cbsi()
 {
     update_screen_buffer();
-    return *cbsi;
+    return cbsi;
 }
 
 COORD windowsapi::get_cursor()
 {
     update_screen_buffer();
-    return cbsi->dwCursorPosition;
+    return (*cbsi)->dwCursorPosition;
 }
 
 COORD windowsapi::set_cursor(int x, int y)
 {
     update_screen_buffer();
-    COORD oldcursor = cbsi->dwCursorPosition;
+    COORD oldcursor = (*cbsi)->dwCursorPosition;
     SetConsoleCursorPosition(request_io_handle(0), COORD{static_cast<short>(x),static_cast<short>(y)});
+    dispatcher->get_text_obj()->set_cursor_pos(x, y);
     return oldcursor;
 }
-

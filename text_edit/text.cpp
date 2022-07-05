@@ -4,38 +4,33 @@
 
 #include "windowsapi.hpp"
 
-text::text(dispatch& dispatcher)
+text::text(dispatch& dispatch_pass)
 {
-	this->dispatcher = &dispatcher;
-    output_handle = this->dispatcher->get_windows_api()->request_io_handle(0);
-    SMALL_RECT window_size{0,0,120,30};
-    COORD buffer_size{120,30};
-    SetConsoleTitleA("TextEdit");
-    SetConsoleWindowInfo(output_handle, true, &window_size);
-    SetConsoleScreenBufferSize(output_handle, buffer_size);
+    dispatcher = &dispatch_pass;
+    window = dispatcher->get_windows_api()->get_window_size();
+    output_handle = dispatcher->get_windows_api()->request_io_handle(0);
+    print_buf = new CHAR_INFO[window.X * window.Y];
 }
 
 std::string text::center_text(const std::string& str)
 {
-    COORD window = dispatcher->get_windows_api()->get_window_size();
-	std::stringstream ss(str);
-	std::string tmp;
-	std::string newstr;
-	int i = 0;
-	int center_x = 0;
-	while(std::getline(ss, tmp, '\n'))
-	{
-        center_x = (window.X - tmp.size()) / 2; 
-		newstr += std::string(center_x, ' ') + tmp + '\n';
-		i++;
-	}
-    const int center_y = window.Y / 2 - i;
-	newstr = std::string(center_y, '\n') + newstr + '\n';
-	return newstr;
+    std::stringstream ss(str);
+    std::string tmp;
+    std::string newstr;
+    int i = 0;
+    int center_x = 0;
+    while (std::getline(ss, tmp, '\n'))
+    {
+        center_x = (window.X - tmp.size()) / 2;
+        newstr += std::string(center_x, ' ') + tmp + '\n';
+        i++;
+    }
+    const int center_y = (window.Y - i) / 2;
+    newstr = std::string(center_y, '\n') + newstr + '\n';
+    return newstr;
 }
 void text::load_string(const std::string& string)
 {
-    int len_ctr_max = dispatcher->get_windows_api()->get_window_size().X;
     std::stringstream ss(string);
     std::string tmp;
     while (std::getline(ss, tmp, '\n'))
@@ -51,66 +46,101 @@ void text::load_string(const std::string& string)
         }
         string_data tmp2;
         tmp2.line = tmp;
-        for (int i = 0; i < tmp2.line.length(); i += len_ctr_max - 1)
+        for (int i = 0; i < tmp2.line.length(); i += window.X - 1)
         {
-            tmp2.displayable_substring.push_back(tmp2.line.substr(i, len_ctr_max - 1));
-            if (i > 0)
-            {
-                tmp2.displayable_substring[0] += "$";
-            }
+            tmp2.displayable_substring.push_back(tmp2.line.substr(i, window.X - 1));
         }
-        *(--tmp2.displayable_substring.end()) += "\n";
         string_objs.push_back(tmp2);
     }
 }
-
-void text::do_wrap(string_data& str, int mov) {}
+void text::set_cursor_pos(int x_pos, int y_pos)
+{
+    x_cursor_pos = x_pos;
+    y_cursor_pos = y_pos;
+    load_attributes();
+    display_whole_buffer();
+}
+SHORT text::get_length_at(int y_loc)
+{
+    return string_objs.size() <= max(y_loc - 1, 0) ? 0 : string_objs[y_loc].displayable_substring[0].length();
+}
+void text::do_scroll(int i)
+{
+    currentoffset += i;
+    currentoffset = max(0, min(i, string_objs.size() - 1));
+}
 
 void text::blit_to_screen_from_internal_buffer()
 {
-    int start_x = 0;
-    int start_y = 0;
-    int screen_size_x = dispatcher->get_windows_api()->get_window_size().X;
-    int end_x = screen_size_x;
-    int end_y = 0;
-    std::string full;
-    for (const auto& sobj : string_objs)
+    std::string full, tmp;
+    for (int i = currentoffset; i < window.Y - 1; i++)
     {
-        end_y = 1 + start_y;
-        full.append(sobj.displayable_substring[0]);
-        start_y = end_y;
+        if (i >= string_objs.size())
+        {
+            break;
+        }
+        tmp = string_objs[i].displayable_substring[0];
+        tmp += std::string(window.X - string_objs[i].displayable_substring[0].length(), ' ');
+        full.append(tmp);
     }
-    text::print_to_console(full, start_x, 0, end_x, end_y);
+    text::print_to_whole_console(full);
 }
 
-void text::print_to_console(const std::string& basic_string, int start_x, int start_y, int end_x, int end_y) const
+void text::load_attributes() const
 {
-    int x_size = dispatcher->get_windows_api()->get_window_size().X;
-    int y_size = dispatcher->get_windows_api()->get_window_size().Y;
-    SMALL_RECT output_rect = {
-        static_cast<short>(start_x),
-        static_cast<short>(start_y),
-        static_cast<short>(x_size),
-        static_cast<short>(y_size)
-    };
-    COORD buffersiz = {static_cast<short>(x_size),static_cast<short>(end_y)};
-    COORD start_coord = {static_cast<short>(start_x),static_cast<short>(start_y)};
-
-    int array_pos = 0;
-    auto print_buf = new CHAR_INFO[basic_string.length()];
-    for (const auto& sb : basic_string)
+    int array_x = 0;
+    int array_y = 0;
+    for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
     {
-        print_buf[array_pos].Char.AsciiChar = sb;
-        print_buf[array_pos].Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY | FOREGROUND_RED;
-        array_pos++;
+        array_x = array_pos % window.X;
+        array_y = floor(array_pos / window.X);
+        if (x_cursor_pos == array_x && y_cursor_pos == array_y)
+        {
+            print_buf[array_pos].Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED
+                | FOREGROUND_INTENSITY;
+        }
+        else
+        {
+            print_buf[array_pos].Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY |
+                FOREGROUND_RED;
+        }
     }
+}
+
+void text::display_whole_buffer()
+{
+    SMALL_RECT output_rect = {
+        static_cast<short>(0),
+        static_cast<short>(0),
+        static_cast<short>(window.X),
+        static_cast<short>(window.Y)
+    };
     WriteConsoleOutputA(
                         output_handle,
                         print_buf,
-                        buffersiz,
-                        start_coord,
+                        window,
+                        {0,0},
                         &output_rect
                        );
-    free(print_buf);
-
+}
+void text::print_to_whole_console(const std::string& basic_string)
+{
+    auto c_str = basic_string.c_str();
+    if (basic_string.length() > window.X * window.Y)
+    {
+        throw std::out_of_range("String longer than allowed window size passed to print to whole console.");
+    }
+    for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
+    {
+        if (array_pos < basic_string.length())
+        {
+            print_buf[array_pos].Char.AsciiChar = c_str[array_pos];
+        }
+        else
+        {
+            print_buf[array_pos].Char.AsciiChar = '\0';
+        }
+    }
+    load_attributes();
+    display_whole_buffer();
 }

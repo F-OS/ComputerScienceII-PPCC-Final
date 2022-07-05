@@ -1,17 +1,14 @@
 #include "dispatch.hpp"
-#include "file_handler.hpp"
-#include "input_tracker.hpp"
-#include "menu.hpp"
-#include "text.hpp"
-
-#define SECOND * 1000
-
+#include "mainhead.h"
 int main()
 {
-	dispatch main_dispatch;
-	while (true)
-	{
-		main_dispatch.spawn_menu();
-	}
-
+    dispatch main_dispatch;
+    while (true)
+    {
+        main_dispatch.spawn_menu();
+        if (main_dispatch.is_shutting_down())
+        {
+            break;
+        }
+    }
 }

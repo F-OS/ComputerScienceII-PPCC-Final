@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cursor.cpp" />
     <ClCompile Include="dispatch.cpp" />
     <ClCompile Include="file_handler.cpp" />
     <ClCompile Include="input_tracker.cpp" />
@@ -143,8 +144,10 @@
     <ClCompile Include="Windows API.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cursor.h" />
     <ClInclude Include="dispatch.hpp" />
     <ClInclude Include="file_handler.hpp" />
+    <ClInclude Include="mainhead.h" />
     <ClInclude Include="input_tracker.hpp" />
     <ClInclude Include="Keytable.hpp" />
     <ClInclude Include="key_press_handler.hpp" />

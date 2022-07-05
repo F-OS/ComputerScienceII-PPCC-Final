@@ -1,26 +1,13 @@
 #include "dispatch.hpp"
 
+#include <stdexcept>
+
+#include "cursor.h"
+#include "file_handler.hpp"
 #include "input_tracker.hpp"
 #include "menu.hpp"
 #include "text.hpp"
 #include "windowsapi.hpp"
-/*
- * Function: exit_program
- * Function Purpose: Exits the program.
- * Arguments: No arguments.
- * Function Flow:
- *	This function sets a bool that calls the cleanup functions of every subsystem through a conditional in the main loop.
- *	The function then spawns a thread to kill the program if cleanup goes over time.
- * Return:
- *	No returns.
- * Throws:
- *	No throws.
- */
-void dispatch::exit_program()
-{
-	start_cleanup = true;
-	_kill = new std::thread(&dispatch::force_kill);
-}
 
 /*
  * Function: is_shutting_down
@@ -30,7 +17,7 @@ void dispatch::exit_program()
  */
 bool dispatch::is_shutting_down() const
 {
-	return start_cleanup;
+    return start_cleanup;
 }
 
 /*
@@ -44,19 +31,15 @@ bool dispatch::is_shutting_down() const
  * Throws:
  *	No throws.
  */
-dispatch::~dispatch()
-{
-	_kill->join();
-}
 
 text* dispatch::get_text_obj()
 {
-    return text_obj;
+    return *text_obj;
 }
 
 windowsapi* dispatch::get_windows_api()
 {
-    return windowsapihandle;
+    return *windowsapihandle;
 }
 bool dispatch::menu_in_control()
 {
@@ -67,6 +50,28 @@ void dispatch::spawn_menu()
     main_menu newmenu(*this);
     newmenu.displaymenu();
 }
+file_handler* dispatch::get_file_obj()
+{
+    return *file_handle;
+}
+cursor* dispatch::get_cursor_obj()
+{
+    return *cursorobj;
+}
+void dispatch::return_to_main()
+{
+    retmain = true;
+}
+bool dispatch::is_return_to_main()
+{
+    if (retmain)
+    {
+        retmain = false;
+        return true;
+    }
+    return false;
+}
+
 /*
  * Function: dispatch
  * Function Purpose: Initializes dispatch
@@ -78,15 +83,16 @@ void dispatch::spawn_menu()
  */
 dispatch::dispatch()
 {
-    in = new input_tracker(*this);
-    windowsapihandle = new windowsapi;
-    text_obj = new text(*this);
+    file_handle = std::make_unique<file_handler*>(new file_handler(""));
+    windowsapihandle = std::make_unique<windowsapi*>(new windowsapi(*this));
+    cursorobj = std::make_unique<cursor*>(new cursor(*this));
+    in = std::make_unique<input_tracker*>(new input_tracker(*this));
+    text_obj = std::make_unique<text*>(new text(*this));
     hooked_keypresses.push_back(std::make_shared<ctrl_q>(*this));
-	hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
-	hooked_keypresses.push_back(std::make_shared<menu_hooked_keys>(*this));
-	hooked_keypresses.push_back(std::make_shared<forward_to_buffer>(*this));
+    hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this));
+    hooked_keypresses.push_back(std::make_shared<cursor_movement_related_keys>(*this));
+    hooked_keypresses.push_back(std::make_shared<forward_to_buffer>(*this));
 }
-
 
 /*
  * Function: get_lock_on_key_state
@@ -100,7 +106,7 @@ dispatch::dispatch()
  */
 bool dispatch::get_lock_on_key_state() const
 {
-	return reading_key_state;
+    return reading_key_state;
 }
 
 /*
@@ -116,11 +122,11 @@ bool dispatch::get_lock_on_key_state() const
  */
 void dispatch::lock_key_state()
 {
-	if (reading_key_state)
-	{
-		throw std::runtime_error("Inconsistent program state. reading_key_state locked while already locked.");
-	}
-	reading_key_state = true;
+    if (reading_key_state)
+    {
+        throw std::runtime_error("Inconsistent program state. reading_key_state locked while already locked.");
+    }
+    reading_key_state = true;
 }
 
 /*
@@ -136,11 +142,11 @@ void dispatch::lock_key_state()
  */
 void dispatch::unlock_key_state()
 {
-	if (!reading_key_state)
-	{
-		throw std::runtime_error("Inconsistent program state. reading_key_state unlocked while already unlocked.");
-	}
-	reading_key_state = false;
+    if (!reading_key_state)
+    {
+        throw std::runtime_error("Inconsistent program state. reading_key_state unlocked while already unlocked.");
+    }
+    reading_key_state = false;
 }
 
 /*
@@ -157,25 +163,13 @@ void dispatch::unlock_key_state()
  */
 void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypresses) const
 {
-	int handler_check = 0;
-	for (const auto& key : keypresses)
-	{
-		for (const auto& kp : hooked_keypresses)
-		{
-			if (kp->process_keypress(key))
-			{
-				break;
-			}
-			else
-			{
-				handler_check++;
-			}
-			if (handler_check == hooked_keypresses.size() && key.bKeyDown != true)
-			{
-				throw std::runtime_error("Unhandled keypress. Keypress code:" + key.wVirtualScanCode);
-			}
-		}
-	}
+    for (const auto& key : keypresses)
+    {
+        for (const auto& kp : hooked_keypresses)
+        {
+            kp->process_keypress(key);
+        }
+    }
 }
 
 /*
@@ -193,7 +187,7 @@ void dispatch::send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypres
  */
 void dispatch::c_new_message(char p, message_tags target)
 {
-	cmessages.push(std::make_pair(p, target));
+    cmessages.push(std::make_pair(p, target));
 }
 
 /*
@@ -213,17 +207,17 @@ void dispatch::c_new_message(char p, message_tags target)
  */
 char dispatch::c_pop_latest_msg_or_return_0(message_tags who)
 {
-	if (cmessages.empty())
-	{
-		return '\0';
-	}
-	const std::pair<char, message_tags> c = cmessages.back();
-	if (c.second == who)
-	{
-		cmessages.pop();
-		return c.first;
-	}
-	return '\0';
+    if (cmessages.empty())
+    {
+        return '\0';
+    }
+    const std::pair<char, message_tags> c = cmessages.back();
+    if (c.second == who)
+    {
+        cmessages.pop();
+        return c.first;
+    }
+    return '\0';
 }
 
 /*
@@ -241,7 +235,7 @@ char dispatch::c_pop_latest_msg_or_return_0(message_tags who)
  */
 void dispatch::s_new_message(short i, message_tags who)
 {
-	smessages.push(std::make_pair(i, who));
+    smessages.push(std::make_pair(i, who));
 }
 
 /*
@@ -261,34 +255,19 @@ void dispatch::s_new_message(short i, message_tags who)
  */
 short dispatch::s_pop_latest_message_or_return_0(message_tags who)
 {
-	if (smessages.empty())
-	{
-		return 0;
-	}
-	std::pair<short, message_tags> last = smessages.back();
-	if (last.second == who)
-	{
-		smessages.pop();
-		return last.first;
-	}
-	return 0;
+    if (smessages.empty())
+    {
+        return 0;
+    }
+    std::pair<short, message_tags> last = smessages.back();
+    if (last.second == who)
+    {
+        smessages.pop();
+        return last.first;
+    }
+    return 0;
 }
-
-/*
- * Function: force_kill
- * Function Purpose: Exit the program.
- * Arguments: None
- * Function Flow:
- *	This function sleeps for 1 second to allow the file handler and text buffer to finish up their work.
- *	The function then calls exit() if it hasn't already been called by text_edit.
- * Return:
- *	N/A exits the program.
- * Throws:
- *	No throws.
- */
-void dispatch::force_kill()
+void dispatch::exit_program()
 {
-	Sleep(1000);
-	std::cout << "Cleanup overtime. Exiting." << std::endl;
-	exit(EXIT_SUCCESS);
+    start_cleanup = true;
 }
