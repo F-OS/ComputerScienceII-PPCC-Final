@@ -1,7 +1,7 @@
 #include "file_handler.hpp"
-#include "Windows.h"
-#include <sstream>
 #include <regex>
+#include <sstream>
+#include "Windows.h"
 file_handler::file_handler(std::string path) : file_path(std::move(path))
 {
     if (file_path.length() != 0u)

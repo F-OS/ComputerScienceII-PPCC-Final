@@ -13,8 +13,7 @@ int main()
     main_menu menu;
     while (true)
     {
-        const menu_options menusel = menu.displaymenu();
-        switch (menusel)
+        switch (menu.displaymenu())
         {
             case menu_options::HELP:
             {
