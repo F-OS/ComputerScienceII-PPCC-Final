@@ -8,7 +8,7 @@ class windowsapi
 public:
     windowsapi(dispatch& dispatch_pass);
 
-    const HANDLE& request_io_handle(int stream);
+    static HANDLE& request_io_handle(int stream);
 
     void save_console_mode();
 
@@ -18,7 +18,7 @@ public:
 
     bool console_has_input_buffered();
 
-    INPUT_RECORD* get_console_input_array(unsigned long& buffer_length);
+    static INPUT_RECORD* get_console_input_array(unsigned long& buffer_length);
 
     COORD get_window_size();
 
@@ -26,7 +26,7 @@ public:
 
     std::shared_ptr<CONSOLE_SCREEN_BUFFER_INFO*> get_cbsi();
 
-    COORD set_cursor(int x, int y);
+    void set_cursor(int x, int y);
 
     COORD get_cursor();
 

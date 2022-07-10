@@ -1,14 +1,17 @@
 #include <stdexcept>
 
 #include "dispatch.hpp"
+#include "message_handler.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
 
+extern message_handler global_message_handler;
+
 windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 {
-    request_io_handle(0);
-    request_io_handle(1);
-    request_io_handle(2);
+    output_handle = request_io_handle(0);
+    input_handle = request_io_handle(1);
+    error_handle = request_io_handle(2);
     if (output_handle == nullptr || input_handle == nullptr || error_handle == nullptr)
     {
         throw std::runtime_error("Failure to secure handle in windowsapi constructor.");
@@ -47,27 +50,18 @@ windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
  * Throws:
  *	out_of_range exception: throws if stream not between 0 and 2
  */
-const HANDLE& windowsapi::request_io_handle(int stream)
+HANDLE& windowsapi::request_io_handle(int stream)
 {
     switch (stream)
     {
         case 0:
-            if (output_handle == nullptr)
-            {
-                output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-            }
+            static HANDLE output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
             return output_handle;
         case 1:
-            if (input_handle == nullptr)
-            {
-                input_handle = GetStdHandle(STD_INPUT_HANDLE);
-            }
+            static HANDLE input_handle = GetStdHandle(STD_INPUT_HANDLE);
             return input_handle;
         case 2:
-            if (error_handle == nullptr)
-            {
-                error_handle = GetStdHandle(STD_ERROR_HANDLE);
-            }
+            static HANDLE error_handle = GetStdHandle(STD_ERROR_HANDLE);
             return error_handle;
         default:
             throw std::out_of_range(
@@ -208,11 +202,9 @@ COORD windowsapi::get_cursor()
     return (*cbsi)->dwCursorPosition;
 }
 
-COORD windowsapi::set_cursor(int x, int y)
+void windowsapi::set_cursor(int x, int y)
 {
     update_screen_buffer();
     const COORD oldcursor = (*cbsi)->dwCursorPosition;
     SetConsoleCursorPosition(request_io_handle(0), COORD{static_cast<short>(x),static_cast<short>(y)});
-    dispatcher->get_text_obj()->set_cursor_pos(x, y);
-    return oldcursor;
 }

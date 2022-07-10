@@ -1,11 +1,14 @@
 #include "cursor.h"
-
+#include "mainhead.h"
+#include "input_tracker.hpp"
+#include "message_handler.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
+
+extern message_handler global_message_handler;
 cursor::cursor(dispatch& dispatch)
 {
     dispatcher = &dispatch;
-    cursorloc = {0,0};
     window_x = dispatcher->get_windows_api()->get_window_size().X;
     window_y = dispatcher->get_windows_api()->get_window_size().Y;
 }
@@ -21,14 +24,15 @@ void cursor::stop_thread()
 }
 void cursor::cursor_tracking_thread()
 {
+    const COORD cursorloc = dispatcher->get_windows_api()->get_cursor();
+    int newcursor_x = cursorloc.X;
+    int newcursor_y = cursorloc.Y;
     while (!(dispatcher->is_shutting_down() || quitflag))
     {
-        cursorloc = dispatcher->get_windows_api()->get_cursor();
-        const int arrow = dispatcher->s_pop_latest_message_or_return_0(message_tags::CURSOR_MOVEMENT_LISTENER);
-        int newcursor_x = cursorloc.X;
-        int newcursor_y = cursorloc.Y;
-
-        if (arrow == 0 || dispatcher->get_lock_on_key_state())
+        int arrow = global_message_handler.s_pop_latest_message_or_return_0(
+                                                                            message_tags::CURSOR_MOVEMENT_LISTENER
+                                                                           );
+        if (arrow == 0)
         {
             continue;
         }
@@ -46,6 +50,12 @@ void cursor::cursor_tracking_thread()
             case DOWN_ARROW:
                 newcursor_y += 1;
                 break;
+            case RETURN_PRESS:
+                global_message_handler.c_new_message('\n', message_tags::BUFFER_MSG_CODE);
+                arrow = 0;
+                newcursor_y += 1;
+                newcursor_x = 0;
+                break;
         }
         if (newcursor_x > window_x)
         {
@@ -54,8 +64,8 @@ void cursor::cursor_tracking_thread()
         }
         if (newcursor_x < 0)
         {
-            newcursor_x = dispatcher->get_text_obj()->get_length_at(newcursor_y - 1);
             newcursor_y -= 1;
+            newcursor_x = dispatcher->get_text_obj()->get_length_at(newcursor_y);
         }
         if (newcursor_y >= window_y - 1)
         {
@@ -72,7 +82,15 @@ void cursor::cursor_tracking_thread()
             newcursor_x = 0;
             newcursor_y += 1;
         }
-        dispatcher->get_windows_api()->set_cursor(newcursor_x, newcursor_y);
+        cursor_x = newcursor_x;
+        cursor_y = newcursor_y;
+        global_message_handler.set_flag(program_flags::CURSOR_ALTERED);
+        global_message_handler.clear_flag(program_flags::KEYBOARD_OP_LOCK);
         Sleep(15);
     }
+}
+
+COORD cursor::get_cursor()
+{
+    return COORD{static_cast<short>(cursor_x),static_cast<short>(cursor_y)};
 }

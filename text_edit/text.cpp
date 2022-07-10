@@ -2,7 +2,10 @@
 
 #include <sstream>
 
+#include "message_handler.h"
 #include "windowsapi.hpp"
+
+extern message_handler global_message_handler;
 
 text::text(dispatch& dispatch_pass)
 {
@@ -54,13 +57,7 @@ void text::load_string(const std::string& string)
         }
     }
 }
-void text::set_cursor_pos(int x_pos, int y_pos)
-{
-    x_cursor_pos = x_pos;
-    y_cursor_pos = y_pos;
-    load_attributes();
-    display_whole_buffer();
-}
+
 SHORT text::get_length_at(int y_loc)
 {
     if (string_objs.size() <= max(y_loc - 1, 0))
@@ -69,6 +66,7 @@ SHORT text::get_length_at(int y_loc)
     }
     return string_objs[y_loc].displayable_substring[0].length();
 }
+
 void text::do_scroll(int i)
 {
     currentoffset += i;
@@ -78,6 +76,15 @@ void text::do_scroll(int i)
 void text::blit_to_screen_from_internal_buffer()
 {
     std::string full;
+    if (global_message_handler.get_flag(program_flags::CURSOR_ALTERED))
+    {
+        const COORD curs = dispatcher->get_cursor_obj()->get_cursor();
+        x_cursor_pos = curs.X;
+        y_cursor_pos = curs.Y;
+        dispatcher->get_windows_api()->set_cursor(curs.X, curs.Y);
+        load_attributes();
+        global_message_handler.clear_flag(program_flags::CURSOR_ALTERED);
+    }
     for (int i = currentoffset; i < window.Y - 1; i++)
     {
         if (i >= string_objs.size())

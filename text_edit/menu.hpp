@@ -1,10 +1,9 @@
 ﻿#ifndef MENU_H
 #define MENU_H
-#include <functional>
-
-#include "dispatch.hpp"
 #include "mainhead.h"
 
+
+enum class menu_options { HELP, NEW, OPEN, QUIT };
 
 class main_menu
 {
@@ -18,23 +17,11 @@ public:
 
     main_menu& operator=(main_menu&& other) = delete;
 
-    explicit main_menu(dispatch& dispatch_pass);
+    explicit main_menu();
 
-    void help();
-
-    void new_file();
-
-    void text_buf_test();
-
-    void open_file();
-
-    void quit_menu();
-
-    void displaymenu();
+    menu_options displaymenu();
 
 private:
-    dispatch* dispatcher;
-
     int menu_renderer(
         const std::string& menu_name,
         const std::string& menu_prefix,
@@ -45,8 +32,6 @@ private:
     std::string name;
     std::string prefix;
     std::string cursor;
-    std::vector<std::pair<std::string, std::function<void()>>> menufunctions;
     std::vector<std::string> menu_items;
-    bool exitflag = true;
 };
 #endif

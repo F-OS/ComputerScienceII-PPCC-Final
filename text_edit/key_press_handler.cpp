@@ -2,15 +2,8 @@
 
 #include <stdexcept>
 
-key_press_handler::key_press_handler(dispatch& disp)
-{
-    dispatcher = &disp;
-}
-
-dispatch* key_press_handler::get_dispatcher()
-{
-    return dispatcher;
-}
+#include "message_handler.h"
+extern message_handler global_message_handler;
 
 bool ctrl_q::process_keypress(const KEY_EVENT_RECORD& keypress)
 {
@@ -29,7 +22,7 @@ bool ctrl_q::process_keypress(const KEY_EVENT_RECORD& keypress)
 
 void ctrl_q::call_functions()
 {
-    get_dispatcher()->return_to_main();
+    global_message_handler.set_flag(program_flags::CTRL_Q_PRESSED);
 }
 
 bool forward_to_buffer::process_keypress(const KEY_EVENT_RECORD& keypress)
@@ -59,7 +52,7 @@ void forward_to_buffer::call_functions(const KEY_EVENT_RECORD& keypress)
         throw std::runtime_error("Failed to get keyboard state.");
     }
     ToAscii(keypress.wVirtualKeyCode, keypress.wVirtualScanCode, keyboard_state, reinterpret_cast<LPWORD>(keybuf), 0);
-    get_dispatcher()->c_new_message(keybuf[0], message_tags::BUFFER_MSG_CODE);
+    global_message_handler.c_new_message(keybuf[0], message_tags::BUFFER_MSG_CODE);
 }
 
 bool cursor_movement_related_keys::process_keypress(const KEY_EVENT_RECORD& keypress)
@@ -79,36 +72,28 @@ bool cursor_movement_related_keys::process_keypress(const KEY_EVENT_RECORD& keyp
 
 void cursor_movement_related_keys::call_functions(const KEY_EVENT_RECORD& keypress)
 {
-    switch (keypress.wVirtualKeyCode)
+    for (int i = 0; i <= min(keypress.wRepeatCount / 2, 1); i++)
     {
+        switch (keypress.wVirtualKeyCode)
+        {
         case KEY_PRESS_LEFT_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
-            {
-                get_dispatcher()->s_new_message(LEFT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            }
+            global_message_handler.s_new_message(LEFT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
             break;
         case KEY_PRESS_RIGHT_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
-            {
-                get_dispatcher()->s_new_message(RIGHT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            }
+            global_message_handler.s_new_message(RIGHT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
             break;
         case KEY_PRESS_UP_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
-            {
-                get_dispatcher()->s_new_message(UP_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            }
+            global_message_handler.s_new_message(UP_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
             break;
         case KEY_PRESS_DOWN_ARROW:
-            for (int i = 0; i <= min(1, keypress.wRepeatCount / 2); i++)
-            {
-                get_dispatcher()->s_new_message(DOWN_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            }
+            global_message_handler.s_new_message(DOWN_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
             break;
         case KEY_PRESS_ENTER:
-            get_dispatcher()->s_new_message(RETURN_PRESS, message_tags::CURSOR_MOVEMENT_LISTENER);
+            global_message_handler.s_new_message(RETURN_PRESS, message_tags::CURSOR_MOVEMENT_LISTENER);
             break;
         default:
             throw std::runtime_error("Bad input for arrow handler");
+        }
     }
 }
+

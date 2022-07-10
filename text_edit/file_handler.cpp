@@ -1,59 +1,98 @@
 #include "file_handler.hpp"
-#include "stdio.h"
+
+#include <sstream>
+#include "message_handler.h"
+extern message_handler global_message_handler;
+
 file_handler::file_handler(std::string path) : file_path(std::move(path))
 {
-    if (file_path.length() == 0u)
+    if (file_path.length() != 0u)
     {
-        open(file_path);
+        open(file_path, false);
     }
 }
 
-int file_handler::open(const std::string& path)
+void file_handler::validate_file_path(std::string& path, bool must_exist)
 {
-    if (current_handle.get() != nullptr && file_path != path)
+    int i = 0;
+    for (int i = 0; path.npos != (i = path.find("/")); i++)
     {
-        fclose(current_handle.get());
-        current_handle.reset(nullptr);
+        path.replace(i, 1, "\\", 1);
     }
-    FILE* f = nullptr;
-    file_path = path;
-    if (file_path.length() == 0u)
+    const std::regex check(R"(([a-zA-Z]\:|\\|.)(\\{1}|((\\{1})[^\\]([^/:*?<>""|]*))+)$)");
+    if (!std::regex_match(path, check))
     {
-        return -1;
+        path = ".\\" + path;
+        if (!std::regex_match(path, check))
+        {
+            throw std::runtime_error(
+                                     "Invalid file name: " + path +
+                                     " fails regex. All file names must start with either the drive letter or ., must use / or \\ to mark directories, and cannot contain ^/:*?<>\"\"|"
+                                    );
+        }
     }
-    const errno_t err = fopen_s(&f, file_path.c_str(), "r");
-    if (err == 0)
+    if (path[0] == '.')
     {
-        fclose(f);
-        fopen_s(&f, file_path.c_str(), "r+");
+        char current_directory[MAX_PATH];
+        if (GetCurrentDirectoryA(MAX_PATH, current_directory) == 0)
+        {
+            throw std::runtime_error(
+                                     "Get Current Directory returned error code: " + std::to_string(
+                                                                                                    static_cast<int>(
+                                                                                                        GetLastError())
+                                                                                                   )
+                                    );
+        }
+        std::string prepend(current_directory);
+        path.erase(std::remove(path.begin(), path.begin() + 1, '.'));
+        path = prepend + path;
     }
-    else if (err == ENOENT)
+    if (must_exist)
     {
-        fopen_s(&f, file_path.c_str(), "w");
+        WIN32_FIND_DATAA fd;
+        const HANDLE a = FindFirstFileA(path.c_str(), &fd);
+        if (a == INVALID_HANDLE_VALUE)
+        {
+            throw std::runtime_error("You have entered a path to a file that does not exist. Did you want New File?");
+        }
     }
-    else
-    {
-        return err;
-    }
-    current_handle.reset(f);
-    return 0;
 }
 
-std::string file_handler::read() const
+void file_handler::open(std::string& path, bool must_exist)
 {
+    if (handle_open)
+    {
+        handle_open = false;
+        fs.close();
+    }
+    validate_file_path(path, must_exist);
+    fs.open(path.c_str(), std::fstream::in | std::fstream::out);
+    file_path = std::move(path);
+    if (!fs.is_open())
+    {
+        throw std::runtime_error("Attempt to open file failed.");
+    }
+    handle_open = true;
+}
+
+std::string file_handler::read()
+{
+    std::string buf;
     std::string buffer;
-    char buf[BUFSIZ];
-    while (fgets(buf, BUFSIZ, current_handle.get()) != nullptr)
+    while (std::getline(fs, buf, '\n'))
     {
-        buffer += std::string(buf);
+        buffer += buf + "\n";
     }
+    fs.clear();
+    fs.seekg(0);
     return buffer;
 }
 
-void file_handler::write(const std::string& a) const
+void file_handler::write(std::string& a)
 {
-    rewind(current_handle.get());
-    fputs(a.c_str(), current_handle.get());
+    fs << a;
+    fs.clear();
+    fs.seekg(0);
 }
 
 bool file_handler::ready_for_exit()

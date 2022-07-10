@@ -25,8 +25,6 @@ public:
 
     void load_string(const std::string& string);
 
-    void set_cursor_pos(int x_pos, int y_pos);
-
     SHORT get_length_at(int y_loc);
 
     void do_scroll(int i);

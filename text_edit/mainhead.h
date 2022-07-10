@@ -1,7 +1,5 @@
 #ifndef MAIN_HEAD_H
 #define MAIN_HEAD_H
-// System Includes
-// Non-class defining program headers
 #include <string>
 #include <vector>
 
@@ -23,8 +21,5 @@ struct string_data
     // This is a vector of strings for display
     std::vector<std::string> displayable_substring; 
 };
-
-
-enum class message_tags { BUFFER_MSG_CODE, CURSOR_MOVEMENT_LISTENER };
 
 #endif

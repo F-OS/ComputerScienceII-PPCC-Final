@@ -2,25 +2,33 @@
 #define FILE_HANDLER_H
 #include <memory>
 
+#include <fstream>
+#include <iostream>
+#include <regex>
 #include "mainhead.h"
-
+#include "Windows.h"
 
 class file_handler
 {
 public:
     file_handler(std::string path);
 
-    int open(const std::string& path);
+    void validate_file_permissions(std::string& path);
 
-    std::string read() const;
+    void validate_file_path(std::string& path, bool must_exist);
 
-    void write(const std::string& a) const;
+    void open(std::string& path, bool must_exist);
+
+    std::string read();
+
+    void write(std::string& a);
 
     bool ready_for_exit();
 
 private:
     std::string file_path;
-    std::unique_ptr<FILE, decltype(&fclose)> current_handle{nullptr,&fclose};
+    std::fstream fs;
+    bool handle_open = false;
 };
 
 #endif

@@ -6,6 +6,7 @@
 #include "cursor.h"
 #include "key_press_handler.hpp"
 #include "mainhead.h"
+enum class message_tags;
 class cursor;
 /*
  * Class: dispatch
@@ -50,7 +51,7 @@ public:
 
     bool menu_in_control();
 
-    void spawn_menu();
+    int spawn_menu();
 
     file_handler* get_file_obj();
 
@@ -70,16 +71,7 @@ public:
 
     void unlock_key_state();
 
-    // Messaging functions
-    void send_to_key_handler(const std::vector<_KEY_EVENT_RECORD>& keypresses) const;
-
-    void c_new_message(char p, message_tags target);
-
-    char c_pop_latest_msg_or_return_0(message_tags who);
-
-    void s_new_message(short i, message_tags who);
-
-    short s_pop_latest_message_or_return_0(message_tags who);
+    void send_to_key_handler();
 
     // Functions for terminating the program
     void exit_program();
@@ -92,7 +84,6 @@ private:
     std::queue<std::pair<short, message_tags>> smessages;
     bool start_cleanup = false;
     bool reading_key_state = false;
-    std::vector<std::shared_ptr<key_press_handler>> hooked_keypresses;
     std::unique_ptr<text*> text_obj;
     std::unique_ptr<windowsapi*> windowsapihandle;
     std::unique_ptr<file_handler*> file_handle;
