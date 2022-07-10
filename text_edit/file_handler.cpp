@@ -2,7 +2,6 @@
 
 #include <sstream>
 #include "message_handler.h"
-extern message_handler global_message_handler;
 
 file_handler::file_handler(std::string path) : file_path(std::move(path))
 {
@@ -14,8 +13,7 @@ file_handler::file_handler(std::string path) : file_path(std::move(path))
 
 void file_handler::validate_file_path(std::string& path, bool must_exist)
 {
-    int i = 0;
-    for (int i = 0; path.npos != (i = path.find("/")); i++)
+    for (int i = 0; std::string::npos != (i = path.find('/')); i++)
     {
         path.replace(i, 1, "\\", 1);
     }
@@ -27,7 +25,7 @@ void file_handler::validate_file_path(std::string& path, bool must_exist)
         {
             throw std::runtime_error(
                                      "Invalid file name: " + path +
-                                     " fails regex. All file names must start with either the drive letter or ., must use / or \\ to mark directories, and cannot contain ^/:*?<>\"\"|"
+                                     R"( fails regex. All file names must start with either the drive letter or ., must use / or \ to mark directories, and cannot contain ^/:*?<>""|)"
                                     );
         }
     }
@@ -43,7 +41,7 @@ void file_handler::validate_file_path(std::string& path, bool must_exist)
                                                                                                    )
                                     );
         }
-        std::string prepend(current_directory);
+        const std::string prepend(current_directory);
         path.erase(std::remove(path.begin(), path.begin() + 1, '.'));
         path = prepend + path;
     }

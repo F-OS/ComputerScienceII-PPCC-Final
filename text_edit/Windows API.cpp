@@ -5,8 +5,6 @@
 #include "text.hpp"
 #include "windowsapi.hpp"
 
-extern message_handler global_message_handler;
-
 windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
 {
     output_handle = request_io_handle(0);

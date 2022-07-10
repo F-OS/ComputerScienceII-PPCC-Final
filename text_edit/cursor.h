@@ -18,8 +18,6 @@ public:
 private:
     void cursor_tracking_thread();
 
-
-
     dispatch* dispatcher;
     std::thread tracker_thread;
     int cursor_x = 0;

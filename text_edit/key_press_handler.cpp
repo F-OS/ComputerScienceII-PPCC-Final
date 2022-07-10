@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include "message_handler.h"
-extern message_handler global_message_handler;
 
 bool ctrl_q::process_keypress(const KEY_EVENT_RECORD& keypress)
 {
@@ -76,24 +75,23 @@ void cursor_movement_related_keys::call_functions(const KEY_EVENT_RECORD& keypre
     {
         switch (keypress.wVirtualKeyCode)
         {
-        case KEY_PRESS_LEFT_ARROW:
-            global_message_handler.s_new_message(LEFT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            break;
-        case KEY_PRESS_RIGHT_ARROW:
-            global_message_handler.s_new_message(RIGHT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            break;
-        case KEY_PRESS_UP_ARROW:
-            global_message_handler.s_new_message(UP_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            break;
-        case KEY_PRESS_DOWN_ARROW:
-            global_message_handler.s_new_message(DOWN_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
-            break;
-        case KEY_PRESS_ENTER:
-            global_message_handler.s_new_message(RETURN_PRESS, message_tags::CURSOR_MOVEMENT_LISTENER);
-            break;
-        default:
-            throw std::runtime_error("Bad input for arrow handler");
+            case KEY_PRESS_LEFT_ARROW:
+                global_message_handler.s_new_message(LEFT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
+                break;
+            case KEY_PRESS_RIGHT_ARROW:
+                global_message_handler.s_new_message(RIGHT_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
+                break;
+            case KEY_PRESS_UP_ARROW:
+                global_message_handler.s_new_message(UP_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
+                break;
+            case KEY_PRESS_DOWN_ARROW:
+                global_message_handler.s_new_message(DOWN_ARROW, message_tags::CURSOR_MOVEMENT_LISTENER);
+                break;
+            case KEY_PRESS_ENTER:
+                global_message_handler.s_new_message(RETURN_PRESS, message_tags::CURSOR_MOVEMENT_LISTENER);
+                break;
+            default:
+                throw std::runtime_error("Bad input for arrow handler");
         }
     }
 }
-

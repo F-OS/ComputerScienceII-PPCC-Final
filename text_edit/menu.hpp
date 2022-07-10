@@ -5,6 +5,7 @@
 
 enum class menu_options { HELP, NEW, OPEN, QUIT };
 
+
 class main_menu
 {
 public:

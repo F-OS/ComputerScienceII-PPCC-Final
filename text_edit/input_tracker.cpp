@@ -3,7 +3,7 @@
 #include "key_press_handler.hpp"
 #include "message_handler.h"
 #include "windowsapi.hpp"
-extern message_handler global_message_handler;
+
 input_tracker::input_tracker()
 {
     tracker_thread = std::thread(&input_tracker::input_tracker_thread, this);
@@ -28,7 +28,7 @@ bool input_tracker::get_thread_lock() const
 
 void input_tracker::set_thread_lock()
 {
-    if (keyslocked == true)
+    if (keyslocked)
     {
         return;
     }
@@ -37,13 +37,12 @@ void input_tracker::set_thread_lock()
 
 void input_tracker::clear_thread_lock()
 {
-    if (keyslocked == false)
+    if (!keyslocked)
     {
         return;
     }
     keyslocked = false;
 }
-
 
 input_tracker::~input_tracker()
 {

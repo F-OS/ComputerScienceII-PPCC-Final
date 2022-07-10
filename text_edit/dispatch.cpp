@@ -10,7 +10,7 @@
 #include "windowsapi.hpp"
 
 #include "message_handler.h"
-extern message_handler global_message_handler;
+
 /*
  * Function: is_shutting_down
  * Function Purpose: Getter of start_cleanup

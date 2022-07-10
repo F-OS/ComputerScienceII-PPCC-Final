@@ -42,6 +42,7 @@ public:
     explicit ctrl_c() { }
 
     bool process_keypress(const KEY_EVENT_RECORD& keypress) override;
+
 private:
     void call_functions() override {}
 
@@ -73,7 +74,7 @@ public:
 private:
     void call_functions() override { }
 
-    void call_functions(const KEY_EVENT_RECORD& keypress);
+    void call_functions(const KEY_EVENT_RECORD& keypress) override;
 };
 
 #endif

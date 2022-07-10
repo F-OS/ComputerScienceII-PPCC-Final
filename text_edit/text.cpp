@@ -5,8 +5,6 @@
 #include "message_handler.h"
 #include "windowsapi.hpp"
 
-extern message_handler global_message_handler;
-
 text::text(dispatch& dispatch_pass)
 {
     dispatcher = &dispatch_pass;
@@ -23,7 +21,7 @@ std::string text::center_text(const std::string& str)
     int i = 0;
     while (std::getline(ss, tmp, '\n'))
     {
-        int center_x = (window.X - tmp.size()) / 2;
+        const int center_x = (window.X - tmp.size()) / 2;
         newstr += std::string(center_x, ' ') + tmp + '\n';
         i++;
     }
@@ -102,8 +100,8 @@ void text::load_attributes() const
 {
     for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
     {
-        int array_x = array_pos % window.X;
-        int array_y = floor(array_pos / window.X);
+        const int array_x = array_pos % window.X;
+        const int array_y = floor(array_pos / window.X);
         if (x_cursor_pos == array_x && y_cursor_pos == array_y)
         {
             print_buf[array_pos].Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED

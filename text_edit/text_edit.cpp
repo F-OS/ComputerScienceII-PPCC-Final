@@ -8,7 +8,7 @@
 #include "stdio.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
-
+message_handler global_message_handler;
 int main()
 {
     dispatch main_dispatch;

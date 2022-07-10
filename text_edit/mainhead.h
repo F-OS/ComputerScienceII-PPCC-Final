@@ -19,7 +19,7 @@ struct string_data
     // This is our string from newline to newline.
     std::string line;
     // This is a vector of strings for display
-    std::vector<std::string> displayable_substring; 
+    std::vector<std::string> displayable_substring;
 };
 
 #endif

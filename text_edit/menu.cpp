@@ -8,8 +8,6 @@
 #include "text.hpp"
 #include "windowsapi.hpp"
 
-extern message_handler global_message_handler;
-
 main_menu::main_menu()
 {
     name = "Main Menu";

@@ -1,5 +1,4 @@
-#include "messenger.hpp"
-
+#include "message_handler.h"
 /*
  * Function: c_new_message
  * Function Purpose: This function sends a message to be asynchronously read by another program subsystem.
@@ -13,7 +12,7 @@
  * Throws:
  *	No throws.
  */
-void messenger::c_new_message(char p, message_tags target)
+void message_handler::c_new_message(char p, message_tags target)
 {
     cmessages.push(std::make_pair(p, target));
 }
@@ -33,7 +32,7 @@ void messenger::c_new_message(char p, message_tags target)
  * Throws:
  *	No throws.
  */
-char messenger::c_pop_latest_msg_or_return_0(message_tags who)
+char message_handler::c_pop_latest_msg_or_return_0(message_tags who)
 {
     if (cmessages.empty())
     {
@@ -61,7 +60,7 @@ char messenger::c_pop_latest_msg_or_return_0(message_tags who)
  * Throws:
  *	No throws.
  */
-void messenger::s_new_message(short i, message_tags who)
+void message_handler::s_new_message(short i, message_tags who)
 {
     smessages.push(std::make_pair(i, who));
 }
@@ -81,7 +80,7 @@ void messenger::s_new_message(short i, message_tags who)
  * Throws:
  *	No throws.
  */
-short messenger::s_pop_latest_message_or_return_0(message_tags who)
+short message_handler::s_pop_latest_message_or_return_0(message_tags who)
 {
     if (smessages.empty())
     {
@@ -94,4 +93,26 @@ short messenger::s_pop_latest_message_or_return_0(message_tags who)
         return last.first;
     }
     return 0;
+}
+void message_handler::set_flag(program_flags flag)
+{
+    if (flags[static_cast<int>(flag)])
+    {
+        return;
+    }
+    flags[static_cast<int>(flag)] = true;
+}
+
+bool message_handler::get_flag(program_flags flag)
+{
+    return flags[static_cast<int>(flag)];
+}
+
+void message_handler::clear_flag(program_flags flag)
+{
+    if (!flags[static_cast<int>(flag)])
+    {
+        return;
+    }
+    flags[static_cast<int>(flag)] = false;
 }

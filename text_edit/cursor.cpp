@@ -1,11 +1,10 @@
 #include "cursor.h"
-#include "mainhead.h"
 #include "input_tracker.hpp"
+#include "mainhead.h"
 #include "message_handler.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
 
-extern message_handler global_message_handler;
 cursor::cursor(dispatch& dispatch)
 {
     dispatcher = &dispatch;
