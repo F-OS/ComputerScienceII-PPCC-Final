@@ -28,9 +28,9 @@ void cursor::cursor_tracking_thread()
     int newcursor_y = cursorloc.Y;
     while (!(dispatcher->is_shutting_down() || quitflag))
     {
-        int arrow = global_message_handler.s_pop_latest_message_or_return_0(
-                                                                            message_tags::CURSOR_MOVEMENT_LISTENER
-                                                                           );
+        const int arrow = global_message_handler.s_pop_latest_message_or_return_0(
+                                                                                  message_tags::CURSOR_MOVEMENT_LISTENER
+                                                                                 );
         if (arrow == 0)
         {
             continue;

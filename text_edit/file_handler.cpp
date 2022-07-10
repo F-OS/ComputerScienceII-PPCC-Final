@@ -86,7 +86,7 @@ std::string file_handler::read()
     return buffer;
 }
 
-void file_handler::write(std::string& a)
+void file_handler::write(const std::string& a)
 {
     fs << a;
     fs.clear();

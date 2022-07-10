@@ -20,15 +20,12 @@ windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
     save_console_mode();
     set_console_mode(1, ENABLE_WINDOW_INPUT);
 
-    const int window_type = GWL_STYLE;
-    const auto current_state = GetWindowLong(consolewindowhandle, window_type);
-    SetWindowLong(consolewindowhandle, window_type, current_state & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
+    const auto current_state = GetWindowLong(consolewindowhandle, C_window_type);
+    SetWindowLong(consolewindowhandle, C_window_type, current_state & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 
-    const SMALL_RECT window_size{0,0,121,30};
-    const COORD buffer_size{121,30};
-    SetConsoleTitleA("TextEdit");
-    SetConsoleWindowInfo(output_handle, 1, &window_size);
-    SetConsoleScreenBufferSize(output_handle, buffer_size);
+    SetConsoleTitleA(C_apptitle);
+    SetConsoleWindowInfo(output_handle, 1, &C_window_size);
+    SetConsoleScreenBufferSize(output_handle, C_buffer_size);
 
     cursorhandle.bVisible = 0;
     SetConsoleCursorInfo(output_handle, &cursorhandle);
@@ -179,9 +176,9 @@ INPUT_RECORD* windowsapi::get_console_input_array(unsigned long& buffer_length)
 COORD windowsapi::get_window_size()
 {
     update_screen_buffer();
-    GetConsoleScreenBufferInfo(output_handle, *cbsi);
     return (*cbsi)->dwMaximumWindowSize;
 }
+
 void windowsapi::update_screen_buffer()
 {
     GetConsoleScreenBufferInfo(output_handle, *cbsi);

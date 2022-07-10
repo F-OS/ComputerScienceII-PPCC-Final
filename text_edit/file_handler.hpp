@@ -15,7 +15,7 @@ public:
 
     std::string read();
 
-    void write(std::string& a);
+    void write(const std::string& a);
 
     bool ready_for_exit();
 
