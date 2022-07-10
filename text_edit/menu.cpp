@@ -5,8 +5,6 @@
 #include "cursor.h"
 #include "file_handler.hpp"
 #include "message_handler.h"
-#include "text.hpp"
-#include "windowsapi.hpp"
 
 main_menu::main_menu()
 {

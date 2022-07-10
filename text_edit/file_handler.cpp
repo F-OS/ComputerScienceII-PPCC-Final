@@ -1,8 +1,7 @@
 #include "file_handler.hpp"
-
+#include "Windows.h"
 #include <sstream>
-#include "message_handler.h"
-
+#include <regex>
 file_handler::file_handler(std::string path) : file_path(std::move(path))
 {
     if (file_path.length() != 0u)
@@ -13,7 +12,8 @@ file_handler::file_handler(std::string path) : file_path(std::move(path))
 
 void file_handler::validate_file_path(std::string& path, bool must_exist)
 {
-    for (int i = 0; std::string::npos != (i = path.find('/')); i++)
+    int i;
+    while (std::string::npos != (i = path.find('/')))
     {
         path.replace(i, 1, "\\", 1);
     }

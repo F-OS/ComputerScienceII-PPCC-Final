@@ -1,8 +1,5 @@
 #ifndef KEY_PRESS_HANDLER_H
 #define KEY_PRESS_HANDLER_H
-#include "dispatch.hpp"
-#include "Keytable.hpp"
-#include "mainhead.h"
 #include "Windows.h"
 class dispatch;
 

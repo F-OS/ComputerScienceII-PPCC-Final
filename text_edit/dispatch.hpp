@@ -4,7 +4,6 @@
 #include <queue>
 
 #include "cursor.h"
-#include "key_press_handler.hpp"
 #include "mainhead.h"
 enum class message_tags;
 class cursor;
@@ -63,15 +62,6 @@ public:
 
     // Constructor & Destructor
     dispatch();
-
-    // pseudomutex functions
-    bool get_lock_on_key_state() const;
-
-    void lock_key_state();
-
-    void unlock_key_state();
-
-    void send_to_key_handler();
 
     // Functions for terminating the program
     void exit_program();

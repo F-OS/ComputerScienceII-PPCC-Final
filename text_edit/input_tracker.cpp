@@ -87,7 +87,7 @@ void input_tracker::input_tracker_thread()
                 case KEY_EVENT:
                     if (inputbuf[i].Event.KeyEvent.wRepeatCount > 1)
                     {
-                        for (int i = 0; i < inputbuf[i].Event.KeyEvent.wRepeatCount; i++)
+                        for (int j = 0; j < inputbuf[i].Event.KeyEvent.wRepeatCount; j++)
                         {
                             keybuffer.push_back(inputbuf[i].Event.KeyEvent);
                         }

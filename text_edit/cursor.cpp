@@ -1,6 +1,6 @@
 #include "cursor.h"
-#include "input_tracker.hpp"
-#include "mainhead.h"
+
+#include "Keytable.hpp"
 #include "message_handler.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
@@ -51,7 +51,6 @@ void cursor::cursor_tracking_thread()
                 break;
             case RETURN_PRESS:
                 global_message_handler.c_new_message('\n', message_tags::BUFFER_MSG_CODE);
-                arrow = 0;
                 newcursor_y += 1;
                 newcursor_x = 0;
                 break;

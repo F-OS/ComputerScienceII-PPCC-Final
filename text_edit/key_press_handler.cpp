@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 
+#include "Keytable.hpp"
 #include "message_handler.h"
 
 bool ctrl_q::process_keypress(const KEY_EVENT_RECORD& keypress)

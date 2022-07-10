@@ -1,8 +1,7 @@
 #include <stdexcept>
+#include <string>
 
 #include "dispatch.hpp"
-#include "message_handler.h"
-#include "text.hpp"
 #include "windowsapi.hpp"
 
 windowsapi::windowsapi(dispatch& dispatch_pass) : dispatcher(&dispatch_pass)
@@ -203,6 +202,5 @@ COORD windowsapi::get_cursor()
 void windowsapi::set_cursor(int x, int y)
 {
     update_screen_buffer();
-    const COORD oldcursor = (*cbsi)->dwCursorPosition;
     SetConsoleCursorPosition(request_io_handle(0), COORD{static_cast<short>(x),static_cast<short>(y)});
 }

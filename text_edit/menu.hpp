@@ -1,6 +1,7 @@
 ﻿#ifndef MENU_H
 #define MENU_H
-#include "mainhead.h"
+#include <string>
+#include <vector>
 
 
 enum class menu_options { HELP, NEW, OPEN, QUIT };

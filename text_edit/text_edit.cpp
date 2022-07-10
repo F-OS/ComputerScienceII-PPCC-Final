@@ -2,10 +2,8 @@
 
 #include "dispatch.hpp"
 #include "file_handler.hpp"
-#include "mainhead.h"
 #include "menu.hpp"
 #include "message_handler.h"
-#include "stdio.h"
 #include "text.hpp"
 #include "windowsapi.hpp"
 message_handler global_message_handler;

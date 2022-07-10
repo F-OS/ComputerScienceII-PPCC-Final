@@ -5,12 +5,8 @@
 #include "cursor.h"
 #include "file_handler.hpp"
 #include "input_tracker.hpp"
-#include "menu.hpp"
-#include "text.hpp"
 #include "windowsapi.hpp"
-
-#include "message_handler.h"
-
+#include "text.hpp"
 /*
  * Function: is_shutting_down
  * Function Purpose: Getter of start_cleanup

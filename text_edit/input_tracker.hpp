@@ -1,6 +1,8 @@
 #ifndef INPUT_TRACKER_H
 #define INPUT_TRACKER_H
 #include <thread>
+#include <vector>
+
 #include "mainhead.h"
 #include "Windows.h"
 

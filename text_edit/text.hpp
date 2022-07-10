@@ -1,7 +1,19 @@
 ﻿#ifndef TEXT_RENDER_H
 #define TEXT_RENDER_H
+#include <string>
+#include <vector>
 #include "dispatch.hpp"
 #include "mainhead.h"
+
+
+// Non-Class objects
+struct string_data
+{
+    // This is our string from newline to newline.
+    std::string line;
+    // This is a vector of strings for display
+    std::vector<std::string> displayable_substring;
+};
 
 
 class text

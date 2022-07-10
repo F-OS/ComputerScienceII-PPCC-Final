@@ -1,20 +1,13 @@
 #ifndef FILE_HANDLER_H
 #define FILE_HANDLER_H
-#include <memory>
-
 #include <fstream>
-#include <iostream>
-#include <regex>
-#include "mainhead.h"
-#include "Windows.h"
+#include <string>
 
 
 class file_handler
 {
 public:
     file_handler(std::string path);
-
-    void validate_file_permissions(std::string& path);
 
     void validate_file_path(std::string& path, bool must_exist);
 
