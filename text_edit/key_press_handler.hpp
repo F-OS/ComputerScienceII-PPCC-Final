@@ -74,4 +74,18 @@ private:
     void call_functions(const KEY_EVENT_RECORD& keypress) override;
 };
 
+
+class text_position_keys final : public key_press_handler
+{
+public:
+    bool process_keypress(const KEY_EVENT_RECORD& keypress) override;
+
+    explicit text_position_keys() { }
+
+private:
+    void call_functions() override { }
+
+    void call_functions(const KEY_EVENT_RECORD& keypress) override;
+};
+
 #endif

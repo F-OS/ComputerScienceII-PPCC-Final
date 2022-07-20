@@ -29,10 +29,11 @@ std::string text::center_text(const std::string& str)
     newstr = std::string(center_y, '\n') + newstr + '\n';
     return newstr;
 }
-void text::load_string(const std::string& string)
+void text::fill_buf()
 {
-    std::stringstream ss(string);
+    std::stringstream ss(bufstr);
     std::string tmp;
+    string_objs.clear();
     while (std::getline(ss, tmp, '\n'))
     {
         if (tmp.length() == 0)
@@ -55,35 +56,63 @@ void text::load_string(const std::string& string)
         }
     }
 }
-
-SHORT text::get_length_at(int y_loc)
+void text::load_buffer(const std::string& instr)
 {
-    if (string_objs.size() <= max(y_loc - 1, 0))
+    bufstr = instr;
+}
+
+const std::string& text::read_buffer()
+{
+    return bufstr;
+}
+
+int text::get_length_at(int y_loc)
+{
+    lock_for_get_length = true;
+    if (y_loc >= table.size() || y_loc < 0)
     {
+        lock_for_get_length = false;
         return 0;
     }
-    return string_objs[y_loc].displayable_substring[0].length();
+    const int table_ret = table[y_loc];
+    lock_for_get_length = false;
+    return table_ret;
 }
 
 void text::do_scroll(int i)
 {
     currentoffset += i;
-    currentoffset = max(0, min(i, string_objs.size() - 1));
+    currentoffset = max(0, currentoffset);
+    currentoffset = min(currentoffset, string_objs.size() - 1);
 }
 
 void text::blit_to_screen_from_internal_buffer()
 {
     std::string full;
-    if (global_message_handler.get_flag(program_flags::CURSOR_ALTERED))
+    bool buffermodified = false;
+    int cursordelta = 0;
+    global_message_handler.set_flag(program_flags::BUFFER_RUNNING);
+    auto a = global_message_handler.c_pop_latest_msg_or_return_0(message_tags::BUFFER_MSG_CODE);
+    while (a.second.second != -1 || a.second.first != -1)
     {
-        const COORD curs = dispatcher->get_cursor_obj()->get_cursor();
-        x_cursor_pos = curs.X;
-        y_cursor_pos = curs.Y;
-        dispatcher->get_windows_api()->set_cursor(curs.X, curs.Y);
-        load_attributes();
-        global_message_handler.clear_flag(program_flags::CURSOR_ALTERED);
+        if (a.first == '\b')
+        {
+            bufstr.erase(offset - 1, 1);
+            cursordelta = -1;
+        }
+        else
+        {
+            cursordelta = 1;
+            bufstr.reserve(bufstr.size() + 1);
+            bufstr.insert(offset, 1, a.first);
+        }
+        a = global_message_handler.c_pop_latest_msg_or_return_0(message_tags::BUFFER_MSG_CODE);
+        global_message_handler.set_flag(program_flags::CURSOR_ALTERED);
+        buffermodified = true;
     }
-    for (int i = currentoffset; i < window.Y - 1; i++)
+    fill_buf();
+    generate_length_table();
+    for (int i = currentoffset; i < window.Y + currentoffset - 1; i++)
     {
         if (i >= string_objs.size())
         {
@@ -93,26 +122,45 @@ void text::blit_to_screen_from_internal_buffer()
         tmp += std::string(window.X - string_objs[i].displayable_substring[0].length(), ' ');
         full.append(tmp);
     }
+    if (global_message_handler.get_flag(program_flags::CURSOR_ALTERED))
+    {
+        const std::pair<int, int> curs = global_message_handler.get_cursor();
+        x_cursor_pos = curs.first;
+        y_cursor_pos = curs.second;
+        dispatcher->get_windows_api()->set_cursor(curs.first, curs.second);
+        global_message_handler.clear_flag(program_flags::CURSOR_ALTERED);
+    }
+    generate_length_table();
+    if (buffermodified)
+    {
+        dispatcher->get_cursor_obj()->change_cursor(cursordelta, 0);
+    }
+    load_attributes();
     print_to_whole_console(full);
+    Sleep(15);
 }
 
-void text::load_attributes() const
+void text::load_attributes()
 {
+    offset = 0;
+    cursoroffset = 0;
+    for (int i = 0; i < y_cursor_pos; i++)
+    {
+        cursoroffset += window.X;
+    }
+    for (int i = 0; i < y_cursor_pos; i++)
+    {
+        offset += get_length_at(i) - 1;
+    }
+    offset += x_cursor_pos + y_cursor_pos * 2;
+    cursoroffset += x_cursor_pos;
     for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
     {
-        const int array_x = array_pos % window.X;
-        const int array_y = floor(array_pos / window.X);
-        if (x_cursor_pos == array_x && y_cursor_pos == array_y)
-        {
-            print_buf[array_pos].Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED
-                | FOREGROUND_INTENSITY;
-        }
-        else
-        {
-            print_buf[array_pos].Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY |
-                FOREGROUND_RED;
-        }
+        print_buf[array_pos].Attributes = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY |
+            FOREGROUND_RED;
     }
+    print_buf[cursoroffset].Attributes = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED |
+        FOREGROUND_INTENSITY;
 }
 
 void text::display_whole_buffer()
@@ -131,16 +179,16 @@ void text::display_whole_buffer()
                         &output_rect
                        );
 }
-void text::print_to_whole_console(const std::string& basic_string)
+void text::print_to_whole_console(const std::string& instr)
 {
-    const auto c_str = basic_string.c_str();
-    if (basic_string.length() > window.X * window.Y)
+    const auto c_str = instr.c_str();
+    if (instr.length() > window.X * window.Y)
     {
         throw std::out_of_range("String longer than allowed window size passed to print to whole console.");
     }
     for (int array_pos = 0; array_pos < window.X * window.Y; array_pos++)
     {
-        if (array_pos < basic_string.length())
+        if (array_pos < instr.length())
         {
             print_buf[array_pos].Char.AsciiChar = c_str[array_pos];
         }
@@ -151,4 +199,18 @@ void text::print_to_whole_console(const std::string& basic_string)
     }
     load_attributes();
     display_whole_buffer();
+}
+
+void text::generate_length_table()
+{
+    if (lock_for_get_length)
+    {
+        return;
+    }
+    table.clear();
+    table.reserve(string_objs.size());
+    for (int i = 0; i < string_objs.size(); i++)
+    {
+        table.push_back(string_objs[i].line.length());
+    }
 }

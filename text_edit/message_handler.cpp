@@ -12,9 +12,13 @@
  * Throws:
  *	No throws.
  */
-void message_handler::c_new_message(char p, message_tags target)
+void message_handler::c_new_message(char p, int x, int y, message_tags target)
 {
-    cmessages.push(std::make_pair(p, target));
+    if (target == message_tags::BUFFER_MSG_CODE && !flags[static_cast<int>(program_flags::BUFFER_RUNNING)])
+    {
+        return;
+    }
+    cmessages.push(std::make_pair(std::make_pair(p, std::make_pair(x, y)), target));
 }
 
 /*
@@ -32,19 +36,19 @@ void message_handler::c_new_message(char p, message_tags target)
  * Throws:
  *	No throws.
  */
-char message_handler::c_pop_latest_msg_or_return_0(message_tags who)
+std::pair<char, std::pair<int, int>> message_handler::c_pop_latest_msg_or_return_0(message_tags who)
 {
     if (cmessages.empty())
     {
-        return '\0';
+        return std::pair{'\0',std::pair{-1,-1}};
     }
-    const std::pair<char, message_tags> c = cmessages.back();
+    const std::pair<std::pair<char, std::pair<int, int>>, message_tags> c = cmessages.back();
     if (c.second == who)
     {
         cmessages.pop();
         return c.first;
     }
-    return '\0';
+    return std::pair{'\0',std::pair{-1,-1}};
 }
 
 /*
@@ -115,4 +119,13 @@ void message_handler::clear_flag(program_flags flag)
         return;
     }
     flags[static_cast<int>(flag)] = false;
+}
+std::pair<int, int> message_handler::get_cursor()
+{
+    return cursorstate;
+}
+void message_handler::set_cursor(int cursor_x, int cursor_y)
+{
+    cursorstate.first = cursor_x;
+    cursorstate.second = cursor_y;
 }

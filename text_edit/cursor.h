@@ -13,6 +13,8 @@ public:
 
     void stop_thread();
 
+    void change_cursor(int delta_x, int delta_y);
+
     COORD get_cursor();
 
 private:
@@ -25,4 +27,5 @@ private:
     int window_x = 0;
     int window_y = 0;
     bool quitflag = false;
+    int offset = 0;
 };

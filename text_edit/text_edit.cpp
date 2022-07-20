@@ -11,6 +11,7 @@ int main()
 {
     dispatch main_dispatch;
     main_menu menu;
+    bool mustexist = false;
     while (true)
     {
         switch (menu.displaymenu())
@@ -43,6 +44,8 @@ You can exit this window by pressing CTRL-Q, too!
                     Sleep(10);
                 }
             }
+            case menu_options::OPEN:
+                mustexist = true;
             case menu_options::NEW:
             {
                 std::string file_to_open;
@@ -50,7 +53,7 @@ You can exit this window by pressing CTRL-Q, too!
                 std::cin >> file_to_open;
                 try
                 {
-                    main_dispatch.get_file_obj()->open(file_to_open, false);
+                    main_dispatch.get_file_obj()->open(file_to_open, mustexist);
                 }
                 catch (std::exception& e)
                 {
@@ -59,7 +62,7 @@ You can exit this window by pressing CTRL-Q, too!
                     break;
                 }
                 const std::string reference_str = main_dispatch.get_file_obj()->read();
-                main_dispatch.get_text_obj()->load_string(reference_str);
+                main_dispatch.get_text_obj()->load_buffer(reference_str);
                 main_dispatch.get_cursor_obj()->start_thread();
                 main_dispatch.get_windows_api()->set_cursor(0, 0);
                 while (!global_message_handler.get_flag(program_flags::CTRL_Q_PRESSED))
@@ -67,12 +70,13 @@ You can exit this window by pressing CTRL-Q, too!
                     main_dispatch.get_text_obj()->blit_to_screen_from_internal_buffer();
                     Sleep(1);
                 }
+                global_message_handler.clear_flag(program_flags::CTRL_Q_PRESSED);
                 main_dispatch.get_cursor_obj()->stop_thread();
+                std::string bufstr = main_dispatch.get_text_obj()->read_buffer();
+                main_dispatch.get_file_obj()->write(bufstr);
                 system("cls");
                 break;
             }
-            case menu_options::OPEN:
-                break;
             case menu_options::QUIT:
                 return 0;
         }

@@ -64,9 +64,16 @@ void file_handler::open(std::string& path, bool must_exist)
         fs.close();
     }
     validate_file_path(path, must_exist);
-    fs.open(path.c_str(), std::fstream::in | std::fstream::out);
+    if (must_exist)
+    {
+        fs.open(path.c_str(), std::fstream::in | std::fstream::out);
+    }
+    else
+    {
+        fs.open(path.c_str(), std::fstream::in);
+    }
     file_path = std::move(path);
-    if (!fs.is_open())
+    if (!fs.is_open() && must_exist)
     {
         throw std::runtime_error("Attempt to open file failed.");
     }

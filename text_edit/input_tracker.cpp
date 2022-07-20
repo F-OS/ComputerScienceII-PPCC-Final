@@ -2,6 +2,7 @@
 
 #include "key_press_handler.hpp"
 #include "message_handler.h"
+#include "text.hpp"
 #include "windowsapi.hpp"
 
 input_tracker::input_tracker()
@@ -10,6 +11,7 @@ input_tracker::input_tracker()
     hooked_keypresses.push_back(std::make_shared<ctrl_q>());
     //hooked_keypresses.push_back(std::make_shared<ctrl_c>(*this)); TODO implement ctrl-c
     hooked_keypresses.push_back(std::make_shared<cursor_movement_related_keys>());
+    hooked_keypresses.push_back(std::make_shared<text_position_keys>());
     hooked_keypresses.push_back(std::make_shared<forward_to_buffer>());
 }
 

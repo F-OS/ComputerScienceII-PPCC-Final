@@ -25,31 +25,43 @@ public:
 
     std::string center_text(const std::string& str);
 
+    void fill_buf();
+
     void do_wrap(string_data& str, int mov);
 
-    void load_attributes() const;
+    void load_attributes();
 
     void display_whole_buffer();
 
-    void print_to_whole_console(const std::string& basic_string);
+    void print_to_whole_console(const std::string& instr);
+
+    void generate_length_table();
 
     void blit_to_screen_from_internal_buffer();
 
-    void load_string(const std::string& string);
+    void load_buffer(const std::string& string);
 
-    SHORT get_length_at(int y_loc);
+    const std::string& read_buffer();
+
+    int get_length_at(int y_loc);
 
     void do_scroll(int i);
 
 private:
     dispatch* dispatcher;
     std::vector<string_data> string_objs;
+    std::vector<int> table;
     HANDLE output_handle;
     int x_cursor_pos = 0;
     int y_cursor_pos = 0;
     CHAR_INFO* print_buf;
     COORD window;
     int currentoffset = 0;
+    std::string bufstr;
+    int cursor_offset_from_zero = 0;
+    bool lock_for_get_length = false;
+    int cursoroffset;
+    int offset;
 };
 
 #endif
