@@ -50,7 +50,7 @@ You can exit this window by pressing CTRL-Q, too!
             {
                 std::string file_to_open;
                 std::cout << "Please enter a file name:" << std::endl;
-                std::cin >> file_to_open;
+                std::getline(std::cin, file_to_open, '\n');
                 try
                 {
                     main_dispatch.get_file_obj()->open(file_to_open, mustexist);
@@ -68,7 +68,7 @@ You can exit this window by pressing CTRL-Q, too!
                 while (!global_message_handler.get_flag(program_flags::CTRL_Q_PRESSED))
                 {
                     main_dispatch.get_text_obj()->blit_to_screen_from_internal_buffer();
-                    Sleep(1);
+                    Sleep(10);
                 }
                 global_message_handler.clear_flag(program_flags::CTRL_Q_PRESSED);
                 main_dispatch.get_cursor_obj()->stop_thread();

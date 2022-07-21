@@ -66,6 +66,7 @@ std::pair<char, std::pair<int, int>> message_handler::c_pop_latest_msg_or_return
  */
 void message_handler::s_new_message(short i, message_tags who)
 {
+    _squeuelen++;
     smessages.push(std::make_pair(i, who));
 }
 
@@ -93,6 +94,7 @@ short message_handler::s_pop_latest_message_or_return_0(message_tags who)
     const std::pair<short, message_tags> last = smessages.back();
     if (last.second == who)
     {
+        _squeuelen--;
         smessages.pop();
         return last.first;
     }
@@ -128,4 +130,8 @@ void message_handler::set_cursor(int cursor_x, int cursor_y)
 {
     cursorstate.first = cursor_x;
     cursorstate.second = cursor_y;
+}
+int message_handler::squeuelen()
+{
+    return _squeuelen;
 }

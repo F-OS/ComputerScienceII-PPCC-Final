@@ -33,27 +33,59 @@ void text::fill_buf()
 {
     std::stringstream ss(bufstr);
     std::string tmp;
-    string_objs.clear();
+    int len = 0;
     while (std::getline(ss, tmp, '\n'))
     {
-        if (tmp.length() == 0)
+        const int strobjlen = string_objs.size() - 1;
+        if (len > strobjlen)
         {
-            string_data tmp2;
-            tmp2.line = "";
-            const std::vector<std::string> blank{""};
-            tmp2.displayable_substring = blank;
-            string_objs.push_back(tmp2);
+            if (tmp.length() == 0)
+            {
+                string_data tmp2;
+                tmp2.line = "";
+                const std::vector<std::string> blank{""};
+                tmp2.displayable_substring = blank;
+                string_objs.push_back(tmp2);
+            }
+            else
+            {
+                string_data tmp2;
+                tmp2.line = tmp;
+                for (int i = 0; i < tmp2.line.length(); i += window.X - 1)
+                {
+                    tmp2.displayable_substring.push_back(tmp2.line.substr(i, window.X - 1));
+                }
+                string_objs.push_back(tmp2);
+            }
         }
         else
         {
-            string_data tmp2;
-            tmp2.line = tmp;
-            for (int i = 0; i < tmp2.line.length(); i += window.X - 1)
+            if (tmp.length() == 0)
             {
-                tmp2.displayable_substring.push_back(tmp2.line.substr(i, window.X - 1));
+                const std::vector<std::string> blank{""};
+                string_objs[len].line = "";
+                string_objs[len].displayable_substring = blank;
             }
-            string_objs.push_back(tmp2);
+            else
+            {
+                string_objs[len].line = tmp;
+                int disp = string_objs[len].displayable_substring.size();
+                int x = 0;
+                for (int i = 0; i < string_objs[len].line.length(); i += window.X - 1)
+                {
+                    if (x < disp)
+                    {
+                        string_objs[len].displayable_substring[x] = tmp.substr(i, window.X - 1);
+                    }
+                    else
+                    {
+                        string_objs[len].displayable_substring.push_back(tmp.substr(i, window.X - 1));
+                    }
+                    x++;
+                }
+            }
         }
+        len++;
     }
 }
 void text::load_buffer(const std::string& instr)
@@ -95,16 +127,24 @@ void text::blit_to_screen_from_internal_buffer()
     auto a = global_message_handler.c_pop_latest_msg_or_return_0(message_tags::BUFFER_MSG_CODE);
     while (a.second.second != -1 || a.second.first != -1)
     {
-        if (a.first == '\b')
+        std::string ins{a.first};
+        if (ins == "\b")
         {
-            bufstr.erase(offset - 1, 1);
+            if (bufstr.length() == 1)
+            {
+                bufstr.erase();
+            }
+            else
+            {
+                bufstr.erase(offset - 1, 1);
+            }
             cursordelta = -1;
         }
         else
         {
             cursordelta = 1;
-            bufstr.reserve(bufstr.size() + 1);
-            bufstr.insert(offset, 1, a.first);
+            bufstr.reserve(bufstr.size() + ins.size());
+            bufstr.insert(offset, ins);
         }
         a = global_message_handler.c_pop_latest_msg_or_return_0(message_tags::BUFFER_MSG_CODE);
         global_message_handler.set_flag(program_flags::CURSOR_ALTERED);

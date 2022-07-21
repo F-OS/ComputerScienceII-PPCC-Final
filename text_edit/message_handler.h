@@ -32,11 +32,14 @@ public:
 
     void set_cursor(int cursor_x, int cursor_y);
 
+    int squeuelen();
+
 private:
     std::queue<std::pair<std::pair<char, std::pair<int, int>>, message_tags>> cmessages;
     std::queue<std::pair<short, message_tags>> smessages;
     bool flags[static_cast<int>(program_flags::MAXVAL) + 1] = {false,false};
     std::pair<int, int> cursorstate;
+    int _squeuelen = 0;
 };
 
 

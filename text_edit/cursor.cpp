@@ -61,8 +61,12 @@ void cursor::cursor_tracking_thread()
 {
     int newcursor_x = cursor_x;
     int newcursor_y = cursor_y;
-    while (!(dispatcher->is_shutting_down() || quitflag))
+    while (!quitflag)
     {
+        if (!global_message_handler.squeuelen())
+        {
+            continue;
+        }
         const int arrow = global_message_handler.s_pop_latest_message_or_return_0(
                                                                                   message_tags::CURSOR_MOVEMENT_LISTENER
                                                                                  );
