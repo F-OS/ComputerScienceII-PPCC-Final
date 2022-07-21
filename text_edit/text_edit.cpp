@@ -74,6 +74,7 @@ You can exit this window by pressing CTRL-Q, too!
                 main_dispatch.get_cursor_obj()->stop_thread();
                 std::string bufstr = main_dispatch.get_text_obj()->read_buffer();
                 main_dispatch.get_file_obj()->write(bufstr);
+                main_dispatch.reload();
                 system("cls");
                 break;
             }

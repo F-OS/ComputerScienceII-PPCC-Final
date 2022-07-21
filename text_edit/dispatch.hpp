@@ -60,6 +60,8 @@ public:
 
     bool is_return_to_main();
 
+    void reload();
+
     // Constructor & Destructor
     dispatch();
 

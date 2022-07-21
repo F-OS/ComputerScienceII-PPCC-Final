@@ -65,6 +65,11 @@ bool dispatch::is_return_to_main()
     }
     return false;
 }
+void dispatch::reload()
+{
+    text_obj.reset();
+    text_obj = std::make_unique<text*>(new text(*this));
+}
 
 /*
  * Function: dispatch
